@@ -271,4 +271,7 @@
 
     <string name="suspend_title_tile">Suspend Action</string>
 
+    <!-- Screenrecord Tile --> 
+    <string name="quick_settings_screenrecord">Screenrecord</string> 
+
 </resources>
