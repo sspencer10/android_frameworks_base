@@ -4256,6 +4256,12 @@ public final class Settings {
         public static final String NAVIGATION_BAR_SHOW = "navigation_bar_show";
 
         /**
+         * Wether pocket judge is enabled or not
+         * @hide
+         */
+        public static final String POCKET_JUDGE = "pocket_judge";
+
+        /**
          * The delay when killing the app on long press takes place
          * @hide
          */
