@@ -4111,6 +4111,7 @@ public final class Settings {
          * The delay when killing the app on long press takes place
          * @hide
          */
+
         public static final String LONG_PRESS_KILL_DELAY = "long_press_kill_delay";
 
         /**
@@ -4118,6 +4119,12 @@ public final class Settings {
          * @hide
          */
         public static final String SWAP_NAVIGATION_KEYS = "swap_navigation_keys";
+
+        /**
+         * Whether to show the negociated charger current in the lockscreen
+         * @hide
+         */
+        public static final String LOCKSCREEN_CHARGING_CURRENT = "lockscreen_charging_current";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
