@@ -19,4 +19,7 @@
     <!-- Navigation keys swaped layout -->
     <string name="config_navBarLayoutSwapped" translatable="false">left[.5W],recent[1WC];home;back[1WC],right[.5W]</string>
 
+    <!-- Allow Opa (Pixel navbar) layout -->
+    <bool name="config_allowOpaLayout">true</bool>
+
 </resources>
