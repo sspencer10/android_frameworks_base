@@ -4710,6 +4710,12 @@ public final class Settings {
         private static final Validator OMNIJAWS_WEATHER_ICON_PACK_VALIDATOR = ANY_STRING_VALIDATOR;
 
         /**
+         * Sensor block per-package
+         * @hide
+         */
+        public static final String SENSOR_BLOCK = "sensor_block";
+
+        /**
          * @hide
          */
         public static final String LOCKSCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
