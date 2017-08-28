@@ -53,4 +53,6 @@
     <string name="menu_ime_always_show">Menu / Keyboard Switcher (always show)</string>
     <string name="search">Search</string>
 
+    <string name="global_action_restart_advanced">Advanced reboot</string>
+
 </resources>
