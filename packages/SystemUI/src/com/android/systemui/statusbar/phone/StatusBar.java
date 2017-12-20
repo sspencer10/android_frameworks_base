@@ -2199,7 +2199,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         return themeInfo != null && themeInfo.isEnabled();
     }
 
-
     // Check for black and white accent overlays
     public void unfuckBlackWhiteAccent() {
         OverlayInfo themeInfo = null;
@@ -2222,6 +2221,20 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mOverlayManager.setEnabled("com.accents.black",
                             true, mLockscreenUserManager.getCurrentUserId());
                 }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void unloadStockDarkTheme() {
+        OverlayInfo themeInfo = null;
+        try {
+            themeInfo = mOverlayManager.getOverlayInfo("com.android.systemui.theme.dark",
+                    mCurrentUserId);
+            if (themeInfo != null && themeInfo.isEnabled()) {
+                mOverlayManager.setEnabled("com.android.systemui.theme.dark",
+                        false /*disable*/, mCurrentUserId);
             }
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -4055,31 +4068,33 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected void updateTheme() {
         final boolean inflated = mStackScroller != null;
 
-        // The system wallpaper defines if QS should be light or dark.
-        WallpaperColors systemColors = mColorExtractor
-                .getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
-        final boolean useDarkTheme = systemColors != null
-                && (systemColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_THEME) != 0;
-            // Check for black and white accent so we don't end up
-            // with white on white or black on black
-            unfuckBlackWhiteAccent();
-
+        int userThemeSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SYSTEM_THEME_STYLE, 0, mCurrentUserId);
+        boolean useDarkTheme = false;
+        if (userThemeSetting == 0) {
+            // The system wallpaper defines if QS should be light or dark.
+            WallpaperColors systemColors = mColorExtractor
+                    .getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
+            useDarkTheme = systemColors != null
+                    && (systemColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_THEME) != 0;
+        } else {
+            useDarkTheme = userThemeSetting == 2;
+        }
         if (isUsingDarkTheme() != useDarkTheme) {
-            mUiOffloadThread.submit(() -> {
-                try {
-                    mOverlayManager.setEnabled("com.android.system.theme.dark",
-                            useDarkTheme, mLockscreenUserManager.getCurrentUserId());
-                    mOverlayManager.setEnabled("com.android.systemui.theme.dark",
-                            useDarkTheme, mLockscreenUserManager.getCurrentUserId());
-                    mOverlayManager.setEnabled("com.android.settings.theme.dark",
-                            useDarkTheme, mLockscreenUserManager.getCurrentUserId());
-                    // Check for black and white accent so we don't end up
-                    // with white on white or black on black
-                    unfuckBlackWhiteAccent();
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Can't change theme", e);
+            try {
+                mOverlayManager.setEnabled("com.android.system.theme.dark",
+                        useDarkTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.settings.theme.dark",
+                        useDarkTheme, mLockscreenUserManager.getCurrentUserId());
+                if (useDarkTheme) {
+                   unloadStockDarkTheme();
                 }
-            });
+                // Check for black and white accent so we don't end up
+                // with white on white or black on black
+                unfuckBlackWhiteAccent();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't change theme", e);
+            }
         }
 
         // Lock wallpaper defines the color of the majority of the views, hence we'll use it
@@ -5503,7 +5518,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.USE_OLD_MOBILETYPE),
                     false, this, UserHandle.USER_ALL);
-            update();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SYSTEM_THEME_STYLE),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -5531,6 +5548,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Settings.System.USE_OLD_MOBILETYPE, 0,
                     UserHandle.USER_CURRENT) != 0;
             TelephonyIcons.updateIcons(USE_OLD_MOBILETYPE);
+            updateTheme();
         }
     }
 
