@@ -70,6 +70,7 @@ public class ThemeAccentUtils {
         "com.android.dialer.theme.dark", //4
         "com.android.contacts.theme.dark", //5
         "com.android.documentsui.theme.dark", //6
+        "com.android.gboard.theme.dark", //7
     };
 
     private static final String[] BLACK_THEMES = {
@@ -80,6 +81,7 @@ public class ThemeAccentUtils {
         "com.android.dialer.theme.black", //4
         "com.android.contacts.theme.black", //5
         "com.android.documentsui.theme.black", //6
+        "com.android.gboard.theme.black", //7
     };
 
     private static final String[] SHISHUNIGHTS_THEMES = {
@@ -91,6 +93,7 @@ public class ThemeAccentUtils {
         "com.android.contacts.theme.shishunights", //5
         "com.android.documentsui.theme.shishunights", //6
         "com.google.android.apps.wellbeing.theme.shishunights", //7
+        "com.android.gboard.theme.shishunights", //8
     };
 
     private static final String[] CHOCOLATE_THEMES = {
@@ -102,6 +105,7 @@ public class ThemeAccentUtils {
         "com.android.contacts.theme.chocolate", //5
         "com.android.documentsui.theme.chocolate", //6
         "com.google.android.apps.wellbeing.theme.chocolate", //7
+        "com.android.gboard.theme.chocolate", //8
     };
 
     private static final String STOCK_DARK_THEME = "com.android.systemui.theme.dark";
