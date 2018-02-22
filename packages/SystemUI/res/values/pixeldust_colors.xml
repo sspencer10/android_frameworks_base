@@ -46,4 +46,28 @@
     <color name="qs_tiles_label_color">@*android:color/text_color_primary</color>
     <color name="qs_tiles_underline_color">@*android:color/foreground_material_light</color>
 
+    <!-- Theme tile DO NOT OVERLAY!!! We need the true colors here! -->
+    <color name="quick_settings_theme_tile_default">#4285F4</color>
+    <color name="quick_settings_theme_tile_red">#ffa80000</color>
+    <color name="quick_settings_theme_tile_pink">#ffe52c5f</color>
+    <color name="quick_settings_theme_tile_purple">#ff3c5ae0</color>
+    <color name="quick_settings_theme_tile_deep_purple">#ff822b6b</color>
+    <color name="quick_settings_theme_tile_indigo">#536DFE</color>
+    <color name="quick_settings_theme_tile_blue">#ff214567</color>
+    <color name="quick_settings_theme_tile_light_blue">#ff327ccb</color>
+    <color name="quick_settings_theme_tile_cyan">#ffe0f2f1</color>
+    <color name="quick_settings_theme_tile_teal">#009688</color>
+    <color name="quick_settings_theme_tile_green">#4CAF50</color>
+    <color name="quick_settings_theme_tile_light_green">#ff00e8e0</color>
+    <color name="quick_settings_theme_tile_lime">#CDDC39</color>
+    <color name="quick_settings_theme_tile_yellow">#FFEB3B</color>
+    <color name="quick_settings_theme_tile_amber">#fff6ca11</color>
+    <color name="quick_settings_theme_tile_orange">#FF9800</color>
+    <color name="quick_settings_theme_tile_deep_orange">#FF5722</color>
+    <color name="quick_settings_theme_tile_brown">#795548</color>
+    <color name="quick_settings_theme_tile_grey">#ff556270</color>
+    <color name="quick_settings_theme_tile_blue_grey">#ff2f3248</color>
+    <color name="quick_settings_theme_tile_black">#000000</color>
+    <color name="quick_settings_theme_tile_white">#ffffff</color>
+
 </resources>
