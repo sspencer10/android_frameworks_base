@@ -290,7 +290,7 @@ public class ThemeTile extends QSTileImpl<BooleanState> {
     }
 
     private ThemeTileItem getThemeItemForStyleMode() {
-        boolean isDark = isUsingDarkTheme() || isUsingBlackTheme() || isUsingShishuNightsTheme()|| isUsingChocolateTheme();
+        boolean isDark = isUsingDarkTheme() || isUsingBlackTheme() || isUsingShishuNightsTheme() || isUsingChocolateTheme();
         if (isDark) {
             return new ThemeTileItem(20, R.color.quick_settings_theme_tile_white,
                     R.string.quick_settings_theme_tile_color_white);
