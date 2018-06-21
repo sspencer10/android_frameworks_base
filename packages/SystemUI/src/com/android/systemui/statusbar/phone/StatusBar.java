@@ -2199,11 +2199,22 @@ public class StatusBar extends SystemUI implements DemoMode,
         return themeInfo != null && themeInfo.isEnabled();
     }
 
+    public boolean isUsingChocolateTheme() {
+        OverlayInfo themeInfo = null;
+        try {
+            themeInfo = mOverlayManager.getOverlayInfo("com.android.system.theme.chocolate",
+                    mLockscreenUserManager.getCurrentUserId());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return themeInfo != null && themeInfo.isEnabled();
+    }
+
     // Check for black and white accent overlays
     public void unfuckBlackWhiteAccent() {
         OverlayInfo themeInfo = null;
         try {
-            if (isUsingDarkTheme() || isUsingBlackTheme() || isUsingShishuNightsTheme()) {
+            if (isUsingDarkTheme() || isUsingBlackTheme() || isUsingShishuNightsTheme() || isUsingChocolateTheme()) {
                 themeInfo = mOverlayManager.getOverlayInfo("com.accents.black",
                         mLockscreenUserManager.getCurrentUserId());
                 if (themeInfo != null && themeInfo.isEnabled()) {
@@ -4092,6 +4103,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         int userThemeSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.SYSTEM_THEME_STYLE, 0, mLockscreenUserManager.getCurrentUserId());
+        boolean useChocolateTheme = false;
         boolean useShishuNightsTheme = false;
         boolean useBlackTheme = false;
         boolean useDarkTheme = false;
@@ -4105,6 +4117,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             useDarkTheme = userThemeSetting == 2;
             useBlackTheme = userThemeSetting == 3;
             useShishuNightsTheme = userThemeSetting == 4;
+            useChocolateTheme = userThemeSetting == 5;
             // Check for black and white accent so we don't end up
             // with white on white or black on black
             unfuckBlackWhiteAccent();
@@ -4153,6 +4166,21 @@ public class StatusBar extends SystemUI implements DemoMode,
                 unfuckBlackWhiteAccent();
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't change shishunights theme", e);
+            }
+        }
+        if (isUsingChocolateTheme() != useChocolateTheme) {
+            try {
+                mOverlayManager.setEnabled("com.android.system.theme.chocolate",
+                        useChocolateTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.systemui.theme.chocolate",
+                        useChocolateTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.settings.theme.chocolate",
+                        useChocolateTheme, mLockscreenUserManager.getCurrentUserId());
+                // Check for black and white accent so we don't end up
+                // with white on white or black on black
+                unfuckBlackWhiteAccent();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't change chocolate theme", e);
             }
         }
 
@@ -4326,7 +4354,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else if (accentSetting == 20) {
             try {
                 // If using a dark theme we use the white accent, otherwise use the black accent
-                if (isUsingDarkTheme() || isUsingBlackTheme() || isUsingShishuNightsTheme()) {
+                if (isUsingDarkTheme() || isUsingBlackTheme() || isUsingShishuNightsTheme() || isUsingChocolateTheme()) {
                     mOverlayManager.setEnabled("com.accents.white",
                             true, mLockscreenUserManager.getCurrentUserId());
                 } else {
