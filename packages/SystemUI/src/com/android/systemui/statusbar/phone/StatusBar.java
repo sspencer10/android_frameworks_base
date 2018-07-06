@@ -4128,6 +4128,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                         useDarkTheme, mLockscreenUserManager.getCurrentUserId());
                 mOverlayManager.setEnabled("com.android.settings.theme.dark",
                         useDarkTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.dialer.theme.dark",
+                        useDarkTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.contacts.theme.dark",
+                        useDarkTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.documentsui.theme.dark",
+                        useDarkTheme, mLockscreenUserManager.getCurrentUserId());
                 if (useDarkTheme) {
                    unloadStockDarkTheme();
                 }
@@ -4146,6 +4152,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                         useBlackTheme, mLockscreenUserManager.getCurrentUserId());
                 mOverlayManager.setEnabled("com.android.settings.theme.black",
                         useBlackTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.dialer.theme.black",
+                        useBlackTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.contacts.theme.black",
+                        useBlackTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.documentsui.theme.black",
+                        useBlackTheme, mLockscreenUserManager.getCurrentUserId());
                 // Check for black and white accent so we don't end up
                 // with white on white or black on black
                 unfuckBlackWhiteAccent();
@@ -4161,6 +4173,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                         useShishuNightsTheme, mLockscreenUserManager.getCurrentUserId());
                 mOverlayManager.setEnabled("com.android.settings.theme.shishunights",
                         useShishuNightsTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.dialer.theme.shishunights",
+                        useShishuNightsTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.contacts.theme.shishunights",
+                        useShishuNightsTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.documentsui.theme.shishunights",
+                        useShishuNightsTheme, mLockscreenUserManager.getCurrentUserId());
                 // Check for black and white accent so we don't end up
                 // with white on white or black on black
                 unfuckBlackWhiteAccent();
@@ -4175,6 +4193,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mOverlayManager.setEnabled("com.android.systemui.theme.chocolate",
                         useChocolateTheme, mLockscreenUserManager.getCurrentUserId());
                 mOverlayManager.setEnabled("com.android.settings.theme.chocolate",
+                        useChocolateTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.dialer.theme.chocolate",
+                        useChocolateTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.contacts.theme.chocolate",
+                        useChocolateTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.android.documentsui.theme.chocolate",
                         useChocolateTheme, mLockscreenUserManager.getCurrentUserId());
                 // Check for black and white accent so we don't end up
                 // with white on white or black on black
