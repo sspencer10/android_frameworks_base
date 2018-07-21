@@ -4448,6 +4448,11 @@ public final class Settings {
         };
 
         /**
+         * @hide
+         */
+        public static final String USE_BOTTOM_GESTURE_NAVIGATION = "use_bottom_gesture_navigation";
+
+        /**
          * These are all public system settings
          *
          * @hide
@@ -4569,6 +4574,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(BATTERY_LIGHT_MEDIUM_COLOR);
             PRIVATE_SETTINGS.add(BATTERY_LIGHT_FULL_COLOR);
             PRIVATE_SETTINGS.add(FINGERPRINT_SUCCESS_VIB);
+            PRIVATE_SETTINGS.add(USE_BOTTOM_GESTURE_NAVIGATION);
         }
 
 
