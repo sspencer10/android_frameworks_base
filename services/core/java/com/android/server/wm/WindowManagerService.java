@@ -7611,6 +7611,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return this.mPolicy.isGestureButtonRegion(x, y);
     }
 
+    @Override
     public boolean isGestureButtonEnabled() {
         return this.mPolicy.isGestureButtonEnabled();
     }
