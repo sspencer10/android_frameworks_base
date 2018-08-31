@@ -105,8 +105,6 @@ public class NavigationBarInflaterView extends FrameLayout
 
     private OverviewProxyService mOverviewProxyService;
 
-    private boolean mSwappedOrder;
-
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
         createInflaters();
@@ -149,11 +147,7 @@ public class NavigationBarInflaterView extends FrameLayout
         final int defaultResource = mOverviewProxyService.shouldShowSwipeUpUI()
                 ? R.string.config_navBarLayoutQuickstep
                 : R.string.config_navBarLayout;
-        if (mSwappedOrder && defaultResource != 1) {
-            return mContext.getString(R.string.config_navBarLayoutSwapped);
-        } else {
-            return mContext.getString(defaultResource);
-        }
+        return mContext.getString(defaultResource);
     }
 
     @Override
@@ -236,17 +230,6 @@ public class NavigationBarInflaterView extends FrameLayout
         if (v instanceof ReverseLinearLayout) {
             ((ReverseLinearLayout) v).setAlternativeOrder(mAlternativeOrder);
         }
-    }
-
-    public void setSwappedOrder(boolean swappedOrder) {
-        if (swappedOrder != mSwappedOrder) {
-            mSwappedOrder = swappedOrder;
-            updateSwappedOrder();
-        }
-    }
-
-    private void updateSwappedOrder() {
-        onTuningChanged(NAV_BAR_VIEWS, getDefaultLayout());
     }
 
     private void initiallyFill(ButtonDispatcher buttonDispatcher) {

@@ -4249,12 +4249,6 @@ public final class Settings {
         public static final String LONG_PRESS_KILL_DELAY = "long_press_kill_delay";
 
         /**
-         * Whether to swap the back and recent keys
-         * @hide
-         */
-        public static final String SWAP_NAVIGATION_KEYS = "swap_navigation_keys";
-
-        /**
          * Whether to show the negociated charger current in the lockscreen
          * @hide
          */
@@ -4595,7 +4589,6 @@ public final class Settings {
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
-            PRIVATE_SETTINGS.add(SWAP_NAVIGATION_KEYS);
             PRIVATE_SETTINGS.add(SWAP_VOLUME_BUTTONS);
             PRIVATE_SETTINGS.add(NOTIFICATION_LIGHT_PULSE_DEFAULT_COLOR);
             PRIVATE_SETTINGS.add(NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_ON);
