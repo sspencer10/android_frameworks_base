@@ -100,6 +100,8 @@ public class BatteryMeterView extends LinearLayout implements
     private boolean mCharging;
     private int mTextChargingSymbol;
 
+    private boolean mQsHeaderOrKeyguard;
+
     public BatteryMeterView(Context context) {
         this(context, null, 0);
     }
@@ -189,6 +191,10 @@ public class BatteryMeterView extends LinearLayout implements
         mLightModeFillColor = Utils.getColorAttr(dualToneLightTheme, R.attr.fillColor);
     }
 
+    public void setIsQuickSbHeaderOrKeyguard(boolean qs) {
+        mQsHeaderOrKeyguard = qs;
+    }
+
     @Override
     public boolean hasOverlappingRendering() {
         return false;
@@ -196,6 +202,13 @@ public class BatteryMeterView extends LinearLayout implements
 
     private boolean isSymmetryBattery() {
         return mStyle != BatteryMeterDrawableBase.BATTERY_STYLE_PORTRAIT;
+    }
+
+    private boolean forcePercentageQsHeader() {
+        return mQsHeaderOrKeyguard && mShowPercentOnQSB == 1
+                && ((mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_PORTRAIT && mForceShowPercent)
+                || mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_TEXT
+                || (!isSymmetryBattery() && mForceShowPercent));
     }
 
     private void loadImageView() {
@@ -260,7 +273,7 @@ public class BatteryMeterView extends LinearLayout implements
         mUser = ActivityManager.getCurrentUser();
         mSettingObserver.observe();
         mSettingObserver.update();
-        //updateShowPercent();
+        updateShowPercent();
         Dependency.get(ConfigurationController.class).addCallback(this);
         mUserTracker.startTracking();
     }
@@ -324,7 +337,7 @@ public class BatteryMeterView extends LinearLayout implements
 
     private void updateShowPercent() {
         final boolean showing = mBatteryPercentView != null;
-        boolean mShow = mForceShowPercent;
+        boolean mShow = mForceShowPercent || forcePercentageQsHeader();
 
         if (mShowBatteryPercent == 1 || mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_TEXT) {
                 mShow = true;      
