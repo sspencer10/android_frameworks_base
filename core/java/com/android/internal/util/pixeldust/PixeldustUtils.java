@@ -242,4 +242,13 @@ public class PixeldustUtils {
         keyguardIntent.putExtra(DISMISS_KEYGUARD_EXTRA_INTENT, launchIntent);
         context.sendBroadcastAsUser(keyguardIntent, user);
     }
+
+    public static void takeScreenrecord(int mode) {
+        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+        try {
+            wm.screenRecordAction(mode);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
 }

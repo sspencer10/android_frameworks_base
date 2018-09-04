@@ -43,4 +43,7 @@
     <!-- Weather -->
     <dimen name="current_weather_image_size">42dp</dimen>
 
+    <!-- Screenrecord -->
+    <dimen name="screenrecord_hint_size">48dp</dimen>
+
 </resources>
