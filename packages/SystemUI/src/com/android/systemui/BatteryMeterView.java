@@ -20,6 +20,7 @@ import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 import static android.provider.Settings.System.STATUS_BAR_BATTERY_STYLE;
 import static android.provider.Settings.System.TEXT_CHARGING_SYMBOL;
+import static android.provider.Settings.System.SHOW_BATTERY_PERCENT_ON_QSB;
 
 import android.animation.ArgbEvaluator;
 import android.app.ActivityManager;
@@ -86,6 +87,7 @@ public class BatteryMeterView extends LinearLayout implements
     private int mUser;
 
     private final Context mContext;
+    private int mShowPercentOnQSB;
 
     /**
      * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings.
@@ -453,6 +455,9 @@ public class BatteryMeterView extends LinearLayout implements
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.TEXT_CHARGING_SYMBOL),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SHOW_BATTERY_PERCENT_ON_QSB),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -470,6 +475,8 @@ public class BatteryMeterView extends LinearLayout implements
                 STATUS_BAR_BATTERY_STYLE, BatteryMeterDrawableBase.BATTERY_STYLE_PORTRAIT, mUser);
             mTextChargingSymbol = Settings.System.getIntForUser(resolver,
                 TEXT_CHARGING_SYMBOL, 0, mUser);
+            mShowPercentOnQSB = Settings.System.getIntForUser(resolver,
+                SHOW_BATTERY_PERCENT_ON_QSB, 0, mUser);
             updateBatteryStyle();
             updateShowPercent();
             updatePercentText();
