@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.policy.IconLogger;
 import com.android.systemui.util.Utils.DisableStateTracker;
 
 import java.text.NumberFormat;
+import java.util.Locale;
 
 public class BatteryMeterView extends LinearLayout implements
         BatteryStateChangeCallback, DarkReceiver, ConfigurationListener {
@@ -88,8 +89,6 @@ public class BatteryMeterView extends LinearLayout implements
     private int mShowPercentText;
     private boolean mCharging;
 
-    private final int mEndPadding;
-
     private boolean mQsHeaderOrKeyguard;
 
     /**
@@ -100,6 +99,9 @@ public class BatteryMeterView extends LinearLayout implements
     private int mNonAdaptedForegroundColor;
     private int mNonAdaptedBackgroundColor;
     private boolean isBatteryPercentHidden;
+
+    private int mBatteryPercentPadding;
+    private boolean mShowBatteryImage;
 
     public BatteryMeterView(Context context) {
         this(context, null, 0);
@@ -142,7 +144,7 @@ public class BatteryMeterView extends LinearLayout implements
                 getResources().getDimensionPixelOffset(R.dimen.battery_margin_bottom));
         addView(mBatteryIconView, mlp);
 
-        mEndPadding = res.getDimensionPixelSize(R.dimen.battery_level_padding_start);
+        mBatteryPercentPadding = getResources().getDimensionPixelSize(R.dimen.battery_level_padding_start);
         updateShowPercent();
         setColorsFromContext(context);
         // Init to not dark at all.
@@ -278,7 +280,7 @@ public class BatteryMeterView extends LinearLayout implements
     private void updatePercentText() {
         if (mBatteryPercentView != null) {
             mBatteryPercentView.setText(
-                    NumberFormat.getPercentInstance().format(mLevel / 100f));
+                    NumberFormat.getPercentInstance(Locale.US).format(mLevel / 100f));
         }
     }
 
@@ -302,8 +304,7 @@ public class BatteryMeterView extends LinearLayout implements
             }
         }
         if (mBatteryPercentView != null) {
-            mBatteryPercentView.setPaddingRelative(0, 0,
-                    mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_TEXT ? 0 : mEndPadding, 0);
+            mBatteryPercentView.setPadding(mShowBatteryImage ? mBatteryPercentPadding : 0, 0, 0, 0);
         }
         mDrawable.showPercentInsideCircle(mShowPercentText == 2);
         mDrawable.setShowPercent(mShowPercentText == 2);
@@ -341,6 +342,9 @@ public class BatteryMeterView extends LinearLayout implements
             mBatteryIconView.setLayoutParams(scaledLayoutParams);
         }
         FontSizeUtils.updateFontSize(mBatteryPercentView, R.dimen.qs_time_expanded_size);
+
+        mBatteryPercentPadding = res.getDimensionPixelSize(R.dimen.battery_level_padding_start);
+        updateShowPercent();
     }
 
     @Override
