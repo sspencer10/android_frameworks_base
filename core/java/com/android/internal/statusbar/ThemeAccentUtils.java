@@ -82,6 +82,7 @@ public class ThemeAccentUtils {
         "com.android.dialer.theme.shishunights", //4
         "com.android.contacts.theme.shishunights", //5
         "com.android.documentsui.theme.shishunights", //6
+        "com.google.android.apps.wellbeing.theme.shishunights", //7
     };
 
     private static final String[] CHOCOLATE_THEMES = {
@@ -92,6 +93,7 @@ public class ThemeAccentUtils {
         "com.android.dialer.theme.chocolate", //4
         "com.android.contacts.theme.chocolate", //5
         "com.android.documentsui.theme.chocolate", //6
+        "com.google.android.apps.wellbeing.theme.chocolate", //7
     };
 
     private static final String STOCK_DARK_THEME = "com.android.systemui.theme.dark";
