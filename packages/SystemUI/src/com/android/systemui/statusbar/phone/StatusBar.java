@@ -4179,6 +4179,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                         useShishuNightsTheme, mLockscreenUserManager.getCurrentUserId());
                 mOverlayManager.setEnabled("com.android.documentsui.theme.shishunights",
                         useShishuNightsTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.google.android.apps.wellbeing.theme.shishunights",
+                        useShishuNightsTheme, mLockscreenUserManager.getCurrentUserId());
                 // Check for black and white accent so we don't end up
                 // with white on white or black on black
                 unfuckBlackWhiteAccent();
@@ -4199,6 +4201,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mOverlayManager.setEnabled("com.android.contacts.theme.chocolate",
                         useChocolateTheme, mLockscreenUserManager.getCurrentUserId());
                 mOverlayManager.setEnabled("com.android.documentsui.theme.chocolate",
+                        useChocolateTheme, mLockscreenUserManager.getCurrentUserId());
+                mOverlayManager.setEnabled("com.google.android.apps.wellbeing.theme.chocolate",
                         useChocolateTheme, mLockscreenUserManager.getCurrentUserId());
                 // Check for black and white accent so we don't end up
                 // with white on white or black on black
