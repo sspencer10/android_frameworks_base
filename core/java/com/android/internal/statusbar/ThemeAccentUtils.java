@@ -52,6 +52,14 @@ public class ThemeAccentUtils {
         "com.accents.jadegreen", //24
         "com.accents.black", // 25
         "com.accents.white", // 26
+        "com.accents.userone", // 27
+        "com.accents.usertwo", // 28
+        "com.accents.userthree", // 29
+        "com.accents.userfour", // 30
+        "com.accents.userfive", // 31
+        "com.accents.usersix", // 32
+        "com.accents.userseven", // 33
+
     };
 
     private static final String[] DARK_THEMES = {
@@ -136,7 +144,7 @@ public class ThemeAccentUtils {
             } else {
                 unloadAccents(om, userId);
             }
-        } else if (accentSetting < 25) {
+        } else if ((accentSetting < 25) || (accentSetting > 26)) {
             try {
                 om.setEnabled(ACCENTS[accentSetting],
                         true, userId);
@@ -315,11 +323,11 @@ public class ThemeAccentUtils {
         }
     }
 
-    // Check for the white accent overlay
-    public static boolean isUsingWhiteAccent(IOverlayManager om, int userId) {
+    // Check for any accent overlay
+    public static boolean isUsingAccent(IOverlayManager om, int userId, int accent) {
         OverlayInfo themeInfo = null;
         try {
-            themeInfo = om.getOverlayInfo(ACCENTS[26],
+            themeInfo = om.getOverlayInfo(ACCENTS[accent],
                     userId);
         } catch (RemoteException e) {
             e.printStackTrace();
