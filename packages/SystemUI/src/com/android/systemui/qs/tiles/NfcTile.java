@@ -28,20 +28,20 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.widget.Switch;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
 /** Quick settings tile: Enable/Disable NFC **/
 public class NfcTile extends QSTileImpl<BooleanState> {
 
-    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_nfc_enabled);
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_nfc);
 
     private NfcAdapter mAdapter;
-
     private boolean mListening;
 
     public NfcTile(QSHost host) {
@@ -99,21 +99,14 @@ public class NfcTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
-
         if (getAdapter() == null) return;
+
         state.value = getAdapter().isEnabled();
         state.label = mContext.getString(R.string.quick_settings_nfc_label);
-        state.slash.isSlashed = !state.value;
         state.icon = mIcon;
-        state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
-
+        state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-
     }
 
     @Override

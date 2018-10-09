@@ -39,6 +39,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
@@ -188,6 +189,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onPanelPeeked() {
         super.onPanelPeeked();
+        removePendingHideExpandedRunnables();
         mBar.makeExpandedVisible(false);
     }
 
