@@ -99,7 +99,6 @@ public class BatteryMeterView extends LinearLayout implements
 
     private int mNonAdaptedForegroundColor;
     private int mNonAdaptedBackgroundColor;
-    private boolean isBatteryPercentHidden;
 
     public BatteryMeterView(Context context) {
         this(context, null, 0);
@@ -129,9 +128,6 @@ public class BatteryMeterView extends LinearLayout implements
 
         addOnAttachStateChangeListener(
                 new DisableStateTracker(DISABLE_NONE, DISABLE2_SYSTEM_ICONS));
-
-        isBatteryPercentHidden = Settings.System.getIntForUser(
-                getContext().getContentResolver(), SHOW_BATTERY_PERCENT, 0, mUser) == 0;
 
         mBatteryIconView = new ImageView(context);
         mBatteryIconView.setImageDrawable(mDrawable);
@@ -245,7 +241,7 @@ public class BatteryMeterView extends LinearLayout implements
 
         if (isCircleBattery()
             || mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_PORTRAIT) {
-            setForceShowPercent(pluggedIn && !isBatteryPercentHidden);
+            setForceShowPercent(pluggedIn);
             // mDrawable.setCharging(pluggedIn) will invalidate the view
         }
         mCharging = pluggedIn;
