@@ -678,6 +678,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private AmbientIndicationNotification mAmbientNotification;
     private RecoginitionObserverFactory mRecognition;
     private boolean mRecognitionEnabled;
+    private boolean mAmbientRecognitionSupported;
 
     /* Interval indicating when AP-Recogntion will run. Default is 2 minutes */
     private int mAmbientRecognitionInterval = 120000;
@@ -3964,6 +3965,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void updateAmbientIndicationForKeyguard() {
+        if (!mAmbientRecognitionSupported) return;
         int recognitionKeyguard = Settings.Secure.getInt(
             mContext.getContentResolver(), AMBIENT_RECOGNITION_KEYGUARD, 1);
         if (!mRecognitionEnabled) return;
@@ -4010,6 +4012,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void initAmbientRecognition() {
+        mAmbientRecognitionSupported = mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_supportAmbientRecognition);
+        if (!mAmbientRecognitionSupported) return;
         mRecognitionEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
                 AMBIENT_RECOGNITION, 0) != 0;
         if (!mRecognitionEnabled) return;
@@ -4020,7 +4025,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void doAmbientRecognition() {
-        if (!mRecognitionEnabled) return;
+        if (!mAmbientRecognitionSupported || !mRecognitionEnabled) return;
         mRecognition.startRecording();
         mHandler.postDelayed(() -> {
                  doStopAmbientRecognition();
