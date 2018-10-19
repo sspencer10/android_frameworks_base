@@ -300,6 +300,8 @@ java_library {
         "core/java/android/companion/ICompanionDeviceDiscoveryService.aidl",
         "core/java/android/companion/ICompanionDeviceDiscoveryServiceCallback.aidl",
         "core/java/android/companion/IFindDeviceCallback.aidl",
+        "core/java/android/pocket/IPocketService.aidl",
+        "core/java/android/pocket/IPocketCallback.aidl",
         "core/java/android/service/dreams/IDreamManager.aidl",
         "core/java/android/service/dreams/IDreamService.aidl",
         "core/java/android/service/oemlock/IOemLockService.aidl",
@@ -598,6 +600,8 @@ java_library {
         "lowpan/java/android/net/lowpan/ILowpanInterface.aidl",
         "lowpan/java/android/net/lowpan/ILowpanManagerListener.aidl",
         "lowpan/java/android/net/lowpan/ILowpanManager.aidl",
+
+        "core/java/com/android/internal/onehand/IOneHandedModeListener.aidl",
 
         "core/java/android/app/admin/SecurityLogTags.logtags",
         "core/java/android/content/EventLogTags.logtags",

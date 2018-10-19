@@ -52,6 +52,14 @@ public class ThemeAccentUtils {
         "com.accents.jadegreen", //24
         "com.accents.black", // 25
         "com.accents.white", // 26
+        "com.accents.userone", // 27
+        "com.accents.usertwo", // 28
+        "com.accents.userthree", // 29
+        "com.accents.userfour", // 30
+        "com.accents.userfive", // 31
+        "com.accents.usersix", // 32
+        "com.accents.userseven", // 33
+
     };
 
     private static final String[] DARK_THEMES = {
@@ -62,6 +70,7 @@ public class ThemeAccentUtils {
         "com.android.dialer.theme.dark", //4
         "com.android.contacts.theme.dark", //5
         "com.android.documentsui.theme.dark", //6
+        "com.android.gboard.theme.dark", //7
     };
 
     private static final String[] BLACK_THEMES = {
@@ -72,6 +81,7 @@ public class ThemeAccentUtils {
         "com.android.dialer.theme.black", //4
         "com.android.contacts.theme.black", //5
         "com.android.documentsui.theme.black", //6
+        "com.android.gboard.theme.black", //7
     };
 
     private static final String[] SHISHUNIGHTS_THEMES = {
@@ -83,6 +93,7 @@ public class ThemeAccentUtils {
         "com.android.contacts.theme.shishunights", //5
         "com.android.documentsui.theme.shishunights", //6
         "com.google.android.apps.wellbeing.theme.shishunights", //7
+        "com.android.gboard.theme.shishunights", //8
     };
 
     private static final String[] CHOCOLATE_THEMES = {
@@ -94,6 +105,7 @@ public class ThemeAccentUtils {
         "com.android.contacts.theme.chocolate", //5
         "com.android.documentsui.theme.chocolate", //6
         "com.google.android.apps.wellbeing.theme.chocolate", //7
+        "com.android.gboard.theme.chocolate", //8
     };
 
     private static final String STOCK_DARK_THEME = "com.android.systemui.theme.dark";
@@ -136,7 +148,7 @@ public class ThemeAccentUtils {
             } else {
                 unloadAccents(om, userId);
             }
-        } else if (accentSetting < 25) {
+        } else if ((accentSetting < 25) || (accentSetting > 26)) {
             try {
                 om.setEnabled(ACCENTS[accentSetting],
                         true, userId);
@@ -315,11 +327,11 @@ public class ThemeAccentUtils {
         }
     }
 
-    // Check for the white accent overlay
-    public static boolean isUsingWhiteAccent(IOverlayManager om, int userId) {
+    // Check for any accent overlay
+    public static boolean isUsingAccent(IOverlayManager om, int userId, int accent) {
         OverlayInfo themeInfo = null;
         try {
-            themeInfo = om.getOverlayInfo(ACCENTS[26],
+            themeInfo = om.getOverlayInfo(ACCENTS[accent],
                     userId);
         } catch (RemoteException e) {
             e.printStackTrace();

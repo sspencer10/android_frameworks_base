@@ -220,11 +220,10 @@
     <!-- OmniJaws -->
     <uses-permission android:name="org.omnirom.omnijaws.READ_WEATHER" />
 
+    <uses-permission android:name="android.permission.ONE_HANDED_MODE" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
-
-    <!-- screenrecord -->
-    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
 
     <!-- Reboot -->
     <uses-permission android:name="android.permission.REBOOT" />
@@ -237,6 +236,15 @@
     <!-- Ambient Indication -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+    <!-- Custom permissions -->
+    <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+
+    <protected-broadcast android:name="android.intent.action.SCREEN_STATE_SERVICE_UPDATE" />
 
     <application
         android:name=".SystemUIApplication"
@@ -296,6 +304,13 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
+
+        <service android:name=".pixeldust.screenstate.ScreenStateService"
+                android:exported="true" >
+            <intent-filter>
+               <action android:name="android.intent.action.SCREEN_STATE_SERVICE_UPDATE"/>
+            </intent-filter>
+        </service>
 
         <!-- started from PhoneWindowManager
              TODO: Should have an android:permission attribute -->
@@ -402,6 +417,21 @@
         <!-- Callback for deleting screenshot notification -->
         <receiver android:name=".screenshot.GlobalScreenshot$DeleteScreenshotReceiver"
             android:process=":screenshot"
+            android:exported="false" />
+
+        <!-- Springboard for launching the share activity -->
+        <receiver android:name=".pixeldust.screenrecord.GlobalScreenrecord$ShareReceiver"
+            android:process=":screenrecord"
+            android:exported="false" />
+
+        <!-- Callback for dismissing screenrecord notification after a share target is picked -->
+        <receiver android:name=".pixeldust.screenrecord.GlobalScreenrecord$TargetChosenReceiver"
+            android:process=":screenrecord"
+            android:exported="false" />
+
+        <!-- Callback for deleting screenrecord notification -->
+        <receiver android:name=".pixeldust.screenrecord.GlobalScreenrecord$DeleteScreenrecordReceiver"
+            android:process=":screenrecord"
             android:exported="false" />
 
         <!-- started from UsbDeviceSettingsManager -->
@@ -668,5 +698,13 @@
             </intent-filter>
         </receiver>
 
+        <!-- CPU Info -->
+        <service android:name=".CPUInfoService"
+                android:exported="false" />
+        <receiver android:name=".BootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

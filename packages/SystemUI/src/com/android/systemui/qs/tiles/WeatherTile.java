@@ -17,8 +17,11 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -28,6 +31,7 @@ import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
+import android.net.Uri;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.Log;
@@ -41,6 +45,7 @@ import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.pixeldust.PackageUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
@@ -68,6 +73,10 @@ public class WeatherTile extends QSTileImpl<BooleanState> implements OmniJawsCli
     private final ActivityStarter mActivityStarter;
     private WeatherDetailAdapter mDetailAdapter;
     private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_weather_default_on);
+
+    private static final String[] ALTERNATIVE_WEATHER_APPS = {
+            "cz.martykan.forecastie",
+    };
 
     public WeatherTile(QSHost host) {
         super(host);
@@ -178,7 +187,22 @@ public class WeatherTile extends QSTileImpl<BooleanState> implements OmniJawsCli
     @Override
     public Intent getLongClickIntent() {
         if (DEBUG) Log.d(TAG, "getLongClickIntent");
-        return mWeatherClient.getSettingsIntent();
+        if (PackageUtils.isPackageInstalled(mContext, "com.google.android.googlequicksearchbox")) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("dynact://velour/weather/ProxyActivity"));
+            intent.setComponent(new ComponentName("com.google.android.googlequicksearchbox",
+                    "com.google.android.apps.gsa.velour.DynamicActivityTrampoline"));
+            return intent;
+        } else {
+            PackageManager pm = mContext.getPackageManager();
+            for (String app: ALTERNATIVE_WEATHER_APPS) {
+                Intent intent = pm.getLaunchIntentForPackage(app);
+                if (intent != null) {
+                    return intent;
+                }
+            }
+            return mWeatherClient.getSettingsIntent();
+        }
     }
 
     @Override

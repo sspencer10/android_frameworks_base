@@ -26,13 +26,53 @@
     <!-- Any package that has one of the package names defined below will be prevented
          from using specific sensors in order to stop battery drain -->
     <string-array name="config_blockPackagesSensorDrain">
-        <item>com.whatsapp</item>
-        <item>com.gbwhatsapp</item>
-        <item>com.yowhatsapp</item>
-        <item>com.whatsapp.plus</item>
-        <item>org.telegram.messenger</item>
-        <item>org.telegram.messenger.plus</item>
-        <item>com.snapchat.android</item>
+        <item>com.whatsapp</item>   
+        <item>com.gbwhatsapp</item>   
+        <item>com.yowhatsapp</item>   
+        <item>com.whatsapp.plus</item>   
+        <item>com.whatsapp.Main</item>
+        <item>com.whatsapp.Whatsapp</item>
+        <item>org.telegram.messenger</item>   
+        <item>org.telegram.messenger.plus</item>  
+        <item>org.telegram.messenger.Telegram</item>
+        <item>com.netease.cloudmusic</item>   
+        <item>fm.xiami.main</item>   
+        <item>com.tencent.weread</item>   
+        <item>com.netease.snailread</item>   
+        <item>com.tencent.mm</item>   
+        <item>com.baidu.browser.apps</item>   
+        <item>com.tencent.tim</item>   
+        <item>org.thunderdog.challegram</item> 
+        <item>com.snapchat.android</item>   
+        <item>com.facebook.orca</item>   
+        <item>com.Slack</item>   
+        <item>tugapower.codeaurora.browser</item>   
+        <item>org.mozilla.firefox</item>   
+        <item>com.android.chrome</item>   
+        <item>com.amazon.mShop.android.shopping</item>   
+        <item>com.google.android.inputmethod.latin</item>   
+        <item>com.google.android.apps.plus</item>   
+        <item>com.google.android.apps.maps</item>   
+        <item>ru.ok.android</item>   
+        <item>com.instagram.android.MainTabActivity</item>  
+        <item>com.facebook.orca.StartScreenActivity</item> 
+        <item>com.spotify.music</item> 
+        <item>com.spotify.music.MainActivity</item>
+        <item>com.android.vending</item>   
+        <item>com.trtf.blue</item>   
+        <item>com.facebook.katana.LoginActivity</item> 
+        <item>com.android.AssetBrowserActivity</item>
+        <item>com.bsb.hike</item>
+        <item>com.csam.icici.bank.imobile</item>
+        <item>com.facebook.katana</item>
+        <item>com.facebook.lite</item>
+        <item>com.google.android.gms</item>
+        <item>com.google.android.gms.setup</item>
+        <item>com.instagram.android</item>
+        <item>com.linkedin.android</item>
+        <item>com.snapchat.android.LandingPageActivity</item>
+        <item>com.spotify</item>
+        <item>com.spotify.music.Spotify</item>
     </string-array>
 
     <!-- The list of vendor package signatures that should also be considered
@@ -88,5 +128,40 @@
 
     <!-- If this is true, Ambient Recognition will be available on the device. -->
     <bool name="config_supportAmbientRecognition">true</bool>
+
+    <!-- Path to the library that contains a device specific key handler -->
+    <string name="config_deviceKeyHandlerLib" translatable="false"></string>
+
+    <!-- Name of that key handler class -->
+    <string name="config_deviceKeyHandlerClass" translatable="false"></string>
+
+    <!-- Setting to false will disable CM's IME switcher implementation for tablets -->
+    <bool name="config_show_cmIMESwitcher">true</bool>
+
+    <!-- Hardware keys present on the device, stored as a bit field.
+         This integer should equal the sum of the corresponding value for each
+         of the following keys present:
+             1 - Home
+             2 - Back
+             4 - Menu
+             8 - Assistant (search)
+            16 - App switch
+            32 - Camera
+            64 - Volume rocker
+         For example, a device with Home, Back and Menu keys would set this
+         config to 7. -->
+    <integer name="config_deviceHardwareKeys">64</integer>
+
+    <integer name="config_LTE_antenna_bar_quantity_metric">0</integer>
+
+    <!-- Flag indicating whether strict threshold is used, or lenient threshold is used,
+          when evaluating RSRP for LTE antenna bar display
+           0. Strict threshold
+           1. Lenient threshold
+    -->
+    <integer name="config_LTE_RSRP_threshold_type">0</integer>
+
+    <!-- Component name for the activity that will be presenting the Oreo's Recents UI -->
+    <string name="config_recentsComponentNameOreo" translatable="false">com.android.systemui/.recents.RecentsActivity</string>
 
 </resources>

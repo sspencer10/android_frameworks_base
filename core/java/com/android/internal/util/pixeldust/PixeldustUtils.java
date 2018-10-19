@@ -17,7 +17,10 @@
 package com.android.internal.util.pixeldust;
 
 import android.app.ActivityManager;
+import android.app.AlertDialog; 
+import android.app.IActivityManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
@@ -27,20 +30,29 @@ import android.content.res.Resources;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.input.InputManager;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.Manifest;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.view.InputDevice;
 import android.view.IWindowManager;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.R;
 import com.android.internal.statusbar.IStatusBarService;
 
 import java.util.List;
@@ -48,8 +60,8 @@ import java.util.Locale;
 
 public class PixeldustUtils {
 
-    public static final String INTENT_SCREENSHOT = "action_take_screenshot";
-    public static final String INTENT_REGION_SCREENSHOT = "action_take_region_screenshot";
+    public static final String INTENT_SCREENSHOT = "action_handler_screenshot";
+    public static final String INTENT_REGION_SCREENSHOT = "action_handler_region_screenshot";
 
     public static boolean isChineseLanguage() {
        return Resources.getSystem().getConfiguration().locale.getLanguage().startsWith(
@@ -77,6 +89,50 @@ public class PixeldustUtils {
        } catch (NameNotFoundException e) {
            return false;
        }
+    }
+
+    public static void restartSystemUi(Context context) {
+        new RestartSystemUiTask(context).execute();
+    }
+
+    public static void showSystemUiRestartDialog(Context context) {
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.systemui_restart_title)
+                .setMessage(R.string.systemui_restart_message)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        restartSystemUi(context);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private static class RestartSystemUiTask extends AsyncTask<Void, Void, Void> {
+        private Context mContext;
+
+        public RestartSystemUiTask(Context context) {
+            super();
+            mContext = context;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                ActivityManager am =
+                        (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+                IActivityManager ams = ActivityManager.getService();
+                for (ActivityManager.RunningAppProcessInfo app: am.getRunningAppProcesses()) {
+                    if ("com.android.systemui".equals(app.processName)) {
+                        ams.killApplicationProcess(app.processName, app.uid);
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
     public static boolean isPackageInstalled(Context context, String pkg, boolean ignoreState) {
@@ -120,17 +176,17 @@ public class PixeldustUtils {
         return false;
     }
 
-    public static boolean isWifiOnly(Context context) {
-        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(
-                Context.CONNECTIVITY_SERVICE);
-        return (cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE) == false);
-    }
-
     public static void switchScreenOff(Context ctx) {
         PowerManager pm = (PowerManager) ctx.getSystemService(Context.POWER_SERVICE);
         if (pm!= null) {
             pm.goToSleep(SystemClock.uptimeMillis());
         }
+    }
+
+	public static boolean deviceHasCompass(Context ctx) {
+        SensorManager sm = (SensorManager) ctx.getSystemService(Context.SENSOR_SERVICE);
+        return sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null
+                && sm.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null;
     }
 
     public static boolean deviceHasFlashlight(Context ctx) {
@@ -215,5 +271,90 @@ public class PixeldustUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * @hide
+     */
+    public static final String SYSTEMUI_PACKAGE_NAME = "com.android.systemui";
+
+    /**
+     * @hide
+     */
+    public static final String ACTION_DISMISS_KEYGUARD = SYSTEMUI_PACKAGE_NAME +".ACTION_DISMISS_KEYGUARD";
+
+    /**
+     * @hide
+     */
+    public static final String DISMISS_KEYGUARD_EXTRA_INTENT = "launch";
+
+    /**
+     * @hide
+     */
+    public static void launchKeyguardDismissIntent(Context context, UserHandle user, Intent launchIntent) {
+        Intent keyguardIntent = new Intent(ACTION_DISMISS_KEYGUARD);
+        keyguardIntent.setPackage(SYSTEMUI_PACKAGE_NAME);
+        keyguardIntent.putExtra(DISMISS_KEYGUARD_EXTRA_INTENT, launchIntent);
+        context.sendBroadcastAsUser(keyguardIntent, user);
+    }
+
+    public static void takeScreenrecord(int mode) {
+        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+        try {
+            wm.screenRecordAction(mode);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Check to see if device is WiFi only
+    public static boolean isWifiOnly(Context context) {
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+        return (cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE) == false);
+    }
+
+    // Check to see if device supports the Fingerprint scanner
+    public static boolean hasFingerprintSupport(Context context) {
+        FingerprintManager fingerprintManager = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
+        return context.getApplicationContext().checkSelfPermission(Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED &&
+                (fingerprintManager != null && fingerprintManager.isHardwareDetected());
+    }
+
+    // Check to see if device not only supports the Fingerprint scanner but also if is enrolled
+    public static boolean hasFingerprintEnrolled(Context context) {
+        FingerprintManager fingerprintManager = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
+        return context.getApplicationContext().checkSelfPermission(Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED &&
+                (fingerprintManager != null && fingerprintManager.isHardwareDetected() && fingerprintManager.hasEnrolledFingerprints());
+    }
+
+    // Check to see if device has a camera
+    public static boolean hasCamera(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
+    }
+
+    // Check to see if device supports NFC
+    public static boolean hasNFC(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC);
+    }
+
+    // Check to see if device supports Wifi
+    public static boolean hasWiFi(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
+    }
+
+    // Check to see if device supports Bluetooth
+    public static boolean hasBluetooth(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH);
+    }
+
+    // Check to see if device supports A/B (seamless) system updates
+    public static boolean isABdevice(Context context) {
+        return SystemProperties.getBoolean("ro.build.ab_update", false);
+    }
+
+    public static boolean isAmbientPlayAvailable(Context context) {
+        return context.getResources()
+                .getBoolean(com.android.internal.R.bool.config_supportAmbientRecognition);
     }
 }

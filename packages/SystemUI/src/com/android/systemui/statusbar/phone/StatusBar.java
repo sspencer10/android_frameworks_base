@@ -96,6 +96,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Process;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -147,6 +148,12 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.pixeldust.DeviceUtils;
+import com.android.internal.util.pixeldust.PixeldustUtils;
+import com.android.internal.util.hwkeys.ActionConstants;
+import com.android.internal.util.hwkeys.ActionUtils;
+import com.android.internal.util.hwkeys.PackageMonitor;
+import com.android.internal.util.hwkeys.PackageMonitor.PackageChangedListener;
+import com.android.internal.util.hwkeys.PackageMonitor.PackageState;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.MessagingGroup;
 import com.android.internal.widget.MessagingMessage;
@@ -269,7 +276,7 @@ import java.util.Map;
 public class StatusBar extends SystemUI implements DemoMode,
         DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener,
         OnHeadsUpChangedListener, CommandQueue.Callbacks, ZenModeController.Callback,
-        ColorExtractor.OnColorsChangedListener, ConfigurationListener, NotificationPresenter {
+        ColorExtractor.OnColorsChangedListener, ConfigurationListener, NotificationPresenter, PackageChangedListener {
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
@@ -428,6 +435,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private boolean mExpandedVisible;
 
+    private boolean mFpDismissNotifications;
+
     private final int[] mAbsPos = new int[2];
     private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
@@ -460,6 +469,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private int mLastDispatchedSystemUiVisibility = ~View.SYSTEM_UI_FLAG_VISIBLE;
 
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+
+    private PackageMonitor mPackageMonitor;
 
     // XXX: gesture research
     private final GestureRecorder mGestureRec = DEBUG_GESTURES
@@ -720,6 +731,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mDisplay = mWindowManager.getDefaultDisplay();
         updateDisplaySize();
+
+        mPackageMonitor = new PackageMonitor();
+        mPackageMonitor.register(mContext, mHandler);
+        mPackageMonitor.addListener(this);
 
         Resources res = mContext.getResources();
         mVibrateOnOpening = mContext.getResources().getBoolean(
@@ -1120,6 +1135,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
+        filter.addAction(PixeldustUtils.ACTION_DISMISS_KEYGUARD);
         context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
 
         IntentFilter demoFilter = new IntentFilter();
@@ -1331,6 +1347,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void clearAllNotifications() {
+        clearAllNotifications(false);
+    }
+
+    private void clearAllNotifications(boolean forceToLeft) {
         // animate-swipe all dismissable notifications, then animate the shade closed
         int numChildren = mStackScroller.getChildCount();
 
@@ -1389,11 +1409,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         });
 
-        performDismissAllAnimations(viewsToHide);
+        performDismissAllAnimations(viewsToHide, forceToLeft);
 
     }
 
-    private void performDismissAllAnimations(ArrayList<View> hideAnimatedList) {
+    private void performDismissAllAnimations(ArrayList<View> hideAnimatedList, boolean forceToLeft) {
         Runnable animationFinishAction = () -> {
             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
         };
@@ -1418,7 +1438,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (i == 0) {
                 endRunnable = animationFinishAction;
             }
-            mStackScroller.dismissViewAnimated(view, endRunnable, totalDelay, 260);
+            mStackScroller.dismissViewAnimated(view, endRunnable, totalDelay, 260, forceToLeft);
             currentDelay = Math.max(50, currentDelay - rowDelayDecrement);
             totalDelay += currentDelay;
         }
@@ -2353,6 +2373,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationPanel.flingSettings(0 /* velocity */, true /* expand */);
                 mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN_QS, 1);
             }
+        } else if (mFpDismissNotifications && (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT == key
+                || KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT == key)) {
+            if (!mNotificationPanel.isFullyCollapsed() && !mNotificationPanel.isExpanding()){
+                mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES);
+                clearAllNotifications(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT == key ? true : false);
+            }
         }
 
     }
@@ -2717,6 +2743,13 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected BarTransitions getStatusBarTransitions() {
         return mStatusBarView.getBarTransitions();
+    }
+
+    @Override  // CommandQueue
+    public void setAutoRotate(boolean enabled) {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.ACCELEROMETER_ROTATION,
+                enabled ? 1 : 0);
     }
 
     protected int computeBarMode(int oldVis, int newVis,
@@ -3197,6 +3230,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             else if (DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG.equals(action)) {
                 mQSPanel.showDeviceMonitoringDialog();
             }
+            else if (PixeldustUtils.ACTION_DISMISS_KEYGUARD.equals(action)) {
+                if (intent.hasExtra(PixeldustUtils.DISMISS_KEYGUARD_EXTRA_INTENT)) {
+                    Intent launchIntent = (Intent) intent.getParcelableExtra(PixeldustUtils.DISMISS_KEYGUARD_EXTRA_INTENT);
+                    startActivityDismissingKeyguard(launchIntent, true, true);
+                }
+            }
         }
     };
 
@@ -3552,6 +3591,29 @@ public class StatusBar extends SystemUI implements DemoMode,
         Dependency.get(ConfigurationController.class).removeCallback(this);
         mZenController.removeCallback(this);
         mAppOpsListener.destroy();
+
+        mPackageMonitor.removeListener(this);
+        mPackageMonitor.unregister();
+    }
+
+    @Override
+    public void onPackageChanged(String pkg, PackageState state) {
+        if (state == PackageState.PACKAGE_REMOVED
+                || state == PackageState.PACKAGE_CHANGED) {
+            final Context ctx = mContext;
+            final Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!ActionUtils.hasNavbarByDefault(ctx)) {
+                        ActionUtils.resolveAndUpdateButtonActions(ctx,
+                                ActionConstants
+                                        .getDefaults(ActionConstants.HWKEYS));
+                    }
+                }
+            });
+            thread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            thread.start();
+        }
     }
 
     private boolean mDemoModeAllowed;
@@ -5321,6 +5383,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SYSTEM_THEME_STYLE),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.FP_SWIPE_TO_DISMISS_NOTIFICATIONS),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -5342,6 +5407,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                 updateTheme();
             }
             update();
+            if (uri.equals(Settings.Secure.getUriFor(
+                    Settings.Secure.FP_SWIPE_TO_DISMISS_NOTIFICATIONS))) {
+                setFpToDismissNotifications();
+            }
         }
 
         public void update() {
@@ -5353,7 +5422,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Settings.System.USE_OLD_MOBILETYPE, 0,
                     UserHandle.USER_CURRENT) != 0;
             TelephonyIcons.updateIcons(USE_OLD_MOBILETYPE);
+            setFpToDismissNotifications();
         }
+    }
+
+    private void setFpToDismissNotifications() {
+        mFpDismissNotifications = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.FP_SWIPE_TO_DISMISS_NOTIFICATIONS, 0,
+                UserHandle.USER_CURRENT) == 1;
     }
 
     private final BroadcastReceiver mBannerActionBroadcastReceiver = new BroadcastReceiver() {

@@ -51,7 +51,7 @@
     <!-- Vibrator pattern for camera gesture launch. -->
     <integer-array translatable="false" name="config_cameraLaunchGestureVibePattern">
         <item>0</item>
-        <item>400</item>
+        <item>80</item>
     </integer-array>
 
     <!-- How many icons may be shown at once in the system bar. Includes any
@@ -74,10 +74,10 @@
     <integer translatable="false" name="config_search_panel_view_vibration_duration">20</integer>
 
     <!-- Show mic or phone affordance on Keyguard -->
-    <bool name="config_keyguardShowLeftAffordance">false</bool>
+    <bool name="config_keyguardShowLeftAffordance">true</bool>
 
     <!-- Show camera affordance on Keyguard -->
-    <bool name="config_keyguardShowCameraAffordance">false</bool>
+    <bool name="config_keyguardShowCameraAffordance">true</bool>
 
     <!-- Whether we should use SRC drawing mode when drawing the scrim behind. If this flag is set,
          we change the canvas opacity so libhwui doesn't call glClear on our surface, and then we
@@ -124,7 +124,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,nfc,saver,work,cast,night,lte,sound,pixeldust_settings,reboot,smartpixels,always_on_display,screenshot,sync,navbar,caffeine,heads_up,ambient_display,expanded_desktop,theme,weather
+        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,nfc,saver,work,cast,night,lte,sound,pixeldust_settings,reboot,smartpixels,always_on_display,screenshot,sync,navbar,caffeine,heads_up,ambient_display,expanded_desktop,theme,weather,sleepscreen,compass,screenrecord,gaming,nowplaying
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -139,8 +139,8 @@
     <bool name="quick_settings_rssi_tile_capitalization">true</bool>
 
     <!-- Timeouts for brightness dialog to disappear -->
-    <integer name="quick_settings_brightness_dialog_short_timeout">2000</integer>
-    <integer name="quick_settings_brightness_dialog_long_timeout">4000</integer>
+    <integer name="quick_settings_brightness_dialog_short_timeout">1000</integer>
+    <integer name="quick_settings_brightness_dialog_long_timeout">3000</integer>
 
     <!-- Should "4G" be shown instead of "LTE" when the network is NETWORK_TYPE_LTE? -->
     <bool name="config_show4GForLTE">true</bool>
@@ -159,7 +159,7 @@
     <integer name="heads_up_notification_minimum_time">2000</integer>
 
     <!-- milliseconds before the heads up notification accepts touches. -->
-    <integer name="touch_acceptance_delay">700</integer>
+    <integer name="touch_acceptance_delay">400</integer>
 
     <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
     <integer name="recents_task_bar_dismiss_delay_seconds">1</integer>
@@ -168,16 +168,16 @@
     <integer name="recents_task_enter_from_app_duration">100</integer>
 
     <!-- The duration for animating the task decorations in after transitioning from an app. -->
-    <integer name="recents_task_enter_from_affiliated_app_duration">100</integer>
+    <integer name="recents_task_enter_from_affiliated_app_duration">75</integer>
 
     <!-- The duration for animating the task decorations out before transitioning to an app. -->
-    <integer name="recents_task_exit_to_app_duration">100</integer>
+    <integer name="recents_task_exit_to_app_duration">75</integer>
 
     <!-- The min animation duration for animating the nav bar scrim in. -->
-    <integer name="recents_nav_bar_scrim_enter_duration">200</integer>
+    <integer name="recents_nav_bar_scrim_enter_duration">100</integer>
 
     <!-- The animation duration for scrolling the stack to a particular item. -->
-    <integer name="recents_animate_task_stack_scroll_duration">150</integer>
+    <integer name="recents_animate_task_stack_scroll_duration">100</integer>
 
     <!-- The delay to enforce between each alt-tab key press. -->
     <integer name="recents_alt_tab_key_delay">200</integer>
@@ -190,7 +190,7 @@
     <bool name="recents_grow_in_multiwindow">true</bool>
 
     <!-- Animation duration when using long press on recents to dock -->
-    <integer name="long_press_dock_anim_duration">250</integer>
+    <integer name="long_press_dock_anim_duration">180</integer>
 
     <!-- Recents: The relative range of visible tasks from the current scroll position
          while the stack is focused. -->
@@ -500,4 +500,8 @@
 
     <!-- On debuggable builds, alert the user if SystemUI PSS goes over this number (in kb) -->
     <integer name="watch_heap_limit">256000</integer>
+
+    <!-- CPUInfoService temperature sysfs path -->
+    <string name="config_cpuinfoSysTemp" translatable="false"></string>
+
 </resources>

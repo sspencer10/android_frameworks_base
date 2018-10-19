@@ -26,6 +26,7 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
 import com.android.systemui.qs.tiles.AlwaysOnDisplayTile;
 import com.android.systemui.qs.tiles.AmbientDisplayTile;
+import com.android.systemui.qs.tiles.AmbientPlayTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.PDSettingsTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
@@ -33,10 +34,12 @@ import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.CaffeineTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
+import com.android.systemui.qs.tiles.CompassTile;
 import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.ExpandedDesktopTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
+import com.android.systemui.qs.tiles.GamingModeTile;
 import com.android.systemui.qs.tiles.HeadsUpTile;
 import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.IntentTile;
@@ -47,9 +50,12 @@ import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
 import com.android.systemui.qs.tiles.RebootTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
+import com.android.systemui.qs.tiles.ScreenrecordTile;
 import com.android.systemui.qs.tiles.ScreenshotTile;
-import com.android.systemui.qs.tiles.SoundTile;
+import com.android.systemui.qs.tiles.SleepScreenTile;
 import com.android.systemui.qs.tiles.SmartPixelsTile;
+import com.android.systemui.qs.tiles.SoundTile;
+import com.android.systemui.qs.tiles.SuspendActionTile;
 import com.android.systemui.qs.tiles.SyncTile;
 import com.android.systemui.qs.tiles.ThemeTile;
 import com.android.systemui.qs.tiles.UserTile;
@@ -143,6 +149,18 @@ public class QSFactoryImpl implements QSFactory {
                 return new ThemeTile(mHost);
             case "weather":
                 return new WeatherTile(mHost);
+            case "sleepscreen":
+                return new SleepScreenTile(mHost);
+            case "compass":
+                return new CompassTile(mHost);
+            case "suspend_action":
+                return new SuspendActionTile(mHost);
+            case "screenrecord":
+                return new ScreenrecordTile(mHost);
+            case "gaming":
+                return new GamingModeTile(mHost);
+            case "nowplaying":
+                return new AmbientPlayTile(mHost);
         }
 
         // Intent tiles.

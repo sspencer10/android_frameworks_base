@@ -3243,6 +3243,12 @@ public final class Settings {
         public static final int SCREEN_BRIGHTNESS_MODE_AUTOMATIC = 1;
 
         /**
+         * Whether to show the IME switcher in the status bar
+         * @hide
+         */
+        public static final String STATUS_BAR_IME_SWITCHER = "status_bar_ime_switcher";
+       
+        /**
          * Control whether the process CPU usage meter should be shown.
          *
          * @deprecated This functionality is no longer available as of
@@ -4237,6 +4243,15 @@ public final class Settings {
                 new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
 
         /**
+         * Setting to show the battery percentage in the quickstatusbar.
+         * @hide
+         */
+        public static final String SHOW_BATTERY_PERCENT_ON_QSB = "show_battery_percent_on_qsb";
+
+        /** @hide */
+        private static final Validator SHOW_BATTERY_PERCENT_ON_QSB_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4248,6 +4263,12 @@ public final class Settings {
          * @hide
          */
         public static final String NAVIGATION_BAR_SHOW = "navigation_bar_show";
+
+        /**
+         * Wether pocket judge is enabled or not
+         * @hide
+         */
+        public static final String POCKET_JUDGE = "pocket_judge";
 
         /**
          * The delay when killing the app on long press takes place
@@ -4386,6 +4407,13 @@ public final class Settings {
         public static final String NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD = "network_traffic_autohide_threshold";
 
         /**
+         * Indicates whether ANBI (Accidental navigation button interaction) is enabled.
+         *
+         * @hide
+         */
+        public static final String ANBI_ENABLED_OPTION = "anbi_enabled_option";
+
+        /**
          * AM/PM Style for clock options
          * 0 - Normal AM/PM
          * 1 - Small AM/PM
@@ -4446,11 +4474,53 @@ public final class Settings {
         public static final Validator STATUSBAR_CLOCK_DATE_FORMAT_VALIDATOR = ANY_STRING_VALIDATOR;
 
         /**
+         * Clock font size
+         * @hide
+         */
+        public static final String STATUS_BAR_CLOCK_SIZE = "status_bar_clock_size";
+
+        /**
+         * Clock font style
+         * @hide
+         */
+        public static final String STATUS_BAR_CLOCK_FONT_STYLE = "status_bar_clock_font_style";
+
+        /**
+         * Whether the phone vibrates on call connect
+         * @hide
+         */
+        public static final String VIBRATE_ON_CONNECT = "vibrate_on_connect";
+         /**
+         * Whether the phone vibrates on call waiting
+         * @hide
+         */
+        public static final String VIBRATE_ON_CALLWAITING = "vibrate_on_callwaiting";
+         /**
+         * Whether the phone vibrates on disconnect
+         * @hide
+         */
+        public static final String VIBRATE_ON_DISCONNECT = "vibrate_on_disconnect";
+
+        /**
          * Whether to display the users option in the power menu
          *
          * @hide
          */
         public static final String POWERMENU_LOGOUT = "powermenu_logout";
+
+        /** some devices have a extra hw button e.g. n3 on the back on the
+         * fingerprint sensor. allow mapping button to key
+         *
+         * @hide
+         */
+        public static final String BUTTON_EXTRA_KEY_MAPPING = "button_extra_mapping";
+
+        /**
+         * Enable proxi check for wake keys - must be implemented in a device
+         * KeyHandler
+         * @hide
+         */
+        public static final String DEVICE_PROXI_CHECK_ENABLED = "device_proxi_check_enabled";
 
         /**
          * Whether to enable the pixel navbar animation
@@ -4570,6 +4640,25 @@ public final class Settings {
         /** @hide */
         private static final Validator QS_TILE_TITLE_VISIBILITY_VALIDATOR = BOOLEAN_VALIDATOR;
 
+        
+        /**
+         * Defines the screen-off animation to display
+         * @hide
+         */
+        public static final String SCREEN_OFF_ANIMATION = "screen_off_animation";
+
+        /**
+         * Whether to show a screen-on animation
+         * @hide
+         */
+        public static final String SCREEN_ON_ANIMATION = "screen_on_animation";
+
+        /**
+         * Disabled Transition animations of the android system
+         * @hide
+         */
+        public static final String DISABLE_TRANSITION_ANIMATIONS = "disable_transition_animations";
+
         /**
          * @hide
          */
@@ -4658,6 +4747,12 @@ public final class Settings {
         private static final Validator OMNIJAWS_WEATHER_ICON_PACK_VALIDATOR = ANY_STRING_VALIDATOR;
 
         /**
+         * Sensor block per-package
+         * @hide
+         */
+        public static final String SENSOR_BLOCK = "sensor_block";
+
+        /**
          * @hide
          */
         public static final String LOCKSCREEN_WEATHER_ENABLED = "lockscreen_weather_enabled";
@@ -4674,12 +4769,270 @@ public final class Settings {
         private static final Validator LOCKSCREEN_WEATHER_SHOW_TEMP_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * SYSTEM_THEME_STYLE value for wallpaper mode.
+         * @hide
+         */
+        public static final int SYSTEM_THEME_STYLE_WALLPAPER = 0;
+
+        /**
+         * SYSTEM_THEME_STYLE value for light theme mode.
+         * @hide
+         */
+        public static final int SYSTEM_THEME_STYLE_LIGHT = 1;
+
+        /**
+         * SYSTEM_THEME_STYLE value for dark theme mode.
+         * @hide
+         */
+        public static final int SYSTEM_THEME_STYLE_DARK = 2;
+
+        /**
+         * SYSTEM_THEME_STYLE value for black theme mode.
+         * @hide
+         */
+        public static final int SYSTEM_THEME_STYLE_BLACK = 3;
+
+        /**
+         * SYSTEM_THEME_STYLE value for sishunights theme mode.
+         * @hide
+         */
+        public static final int SYSTEM_THEME_STYLE_SHISHUNIGHTS = 4;
+
+        /**
+         * SYSTEM_THEME_STYLE value for chocolate theme mode.
+         * @hide
+         */
+        public static final int SYSTEM_THEME_STYLE_CHOCOLATE = 5;
+
+        /**
          * @hide
          */
         public static final String LOCKSCREEN_WEATHER_SHOW_CITY = "lockscreen_weather_show_city";
 
         /** @hide */
         private static final Validator LOCKSCREEN_WEATHER_SHOW_CITY_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
+	     ** Change fonts for the system lockscreen clock widget
+	     **
+	     ** @hide
+	     **/
+        public static final String LOCK_CLOCK_FONTS = "lock_clock_fonts";
+
+        /**
+         * Enable\Disable Bluetooth Battery bar
+         * @hide
+         */
+        public static final String BLUETOOTH_SHOW_BATTERY = "bluetooth_show_battery";
+
+        /**
+         * Enable\Disable Bluetooth Battery bar in quick settings
+         * @hide
+         */
+        public static final String BLUETOOTH_QS_SHOW_BATTERY = "bluetooth_qs_show_battery";
+
+        /**  
+         * AOKP Custom System Animations
+         * @hide
+         */  
+        public static final String[] ACTIVITY_ANIMATION_CONTROLS = new String[] {
+                "activity_open",
+                "activity_close",
+                "task_open",
+                "task_close",
+                "task_to_front",
+                "task_to_back",
+                "wallpaper_open",
+                "wallpaper_close",
+                "wallpaper_intra_open",
+                "wallpaper_intra_close",
+                "task_open_behind",
+        };  
+        public static final String ANIMATION_CONTROLS_DURATION = "animation_controls_duration";
+
+        /**
+         * Toast animations
+         *
+         * @hide
+         */
+        public static final String TOAST_ANIMATION = "toast_animation";
+
+        /**
+         * ListView Animations
+         * 0 == None
+         * 1 == Wave (Left)
+         * 2 == Wave (Right)
+         * 3 == Scale
+         * 4 == Alpha
+         * 5 == Stack (Top)
+         * 6 == Stack (Bottom)
+         * 7 == Translate (Left)
+         * 8 == Translate (Right)
+         * @hide
+         */
+        public static final String LISTVIEW_ANIMATION = "listview_animation";
+
+        /**
+         * ListView Interpolators
+         * 0 == None
+         * 1 == accelerate_interpolator
+         * 2 == decelerate_interpolator
+         * 3 == accelerate_decelerate_interpolator
+         * 4 == anticipate_interpolator
+         * 5 == overshoot_interpolator
+         * 6 == anticipate_overshoot_interpolator
+         * 7 == bounce_interpolator
+         * @hide
+         */
+        public static final String LISTVIEW_INTERPOLATOR = "listview_interpolator";
+
+        /**
+          * Volume keys control cursor in text fields (default is 0)
+          * 0 - Disabled
+          * 1 - Volume up/down moves cursor left/right
+          * 2 - Volume up/down moves cursor right/left
+          * @hide
+          */
+         public static final String VOLUME_KEY_CURSOR_CONTROL = "volume_key_cursor_control";
+
+        /**
+         * Override and forcefully disable the fullscreen keyboard
+         * @hide
+         */
+        public static final String DISABLE_FULLSCREEN_KEYBOARD = "disable_fullscreen_keyboard";
+
+        /**
+         * Automatic keyboard rotation timeout.  0 to disable completely.
+         * @hide
+         */
+        public static final String KEYBOARD_ROTATION_TIMEOUT = "keyboard_rotation_timeout";
+
+        /**
+         * Forces formal text input.  1 to replace emoticon key with enter key.
+         * @hide
+         */
+        public static final String FORMAL_TEXT_INPUT = "formal_text_input";
+
+        /**
+         * Whether to show battery percent on ambient bottom
+         * @hide
+         */
+        public static final String AMBIENT_BATTERY_PERCENT = "ambient_battery_percent";
+
+        /**
+         * Enable blocking wakelock
+         * @hide
+         */
+        public static final String WAKELOCK_BLOCKING_ENABLED = "wakelock_blocking_enabled";
+
+        /**
+         * List of wakelock blocks selected
+         * @hide
+         */
+        public static final String WAKELOCK_BLOCKING_LIST = "wakelock_blocking_list";
+
+        /**
+         * List of alarms blocks selected
+         * @hide
+         */
+        public static final String ALARM_BLOCKING_LIST = "alarm_blocking_list";
+
+        /**
+         * Enable blocking alarm
+         * @hide
+         */
+        public static final String ALARM_BLOCKING_ENABLED = "alarm_blocking_enabled";
+        
+        /**
+         * @hide
+         */
+        public static final String SCREEN_STATE_TWOG = "screen_state_twog";
+
+        /**
+         * @hide
+         */
+        public static final String SCREEN_STATE_GPS = "screen_state_gps";
+
+        /**
+         * @hide
+         */
+        public static final String SCREEN_STATE_MOBILE_DATA = "screen_state_mobile_data";
+
+        /**
+         * @hide
+         */
+        public static final String SCREEN_STATE_OFF_DELAY = "screen_state_off_delay";
+
+        /**
+         * @hide
+         */
+        public static final String SCREEN_STATE_ON_DELAY = "screen_state_on_delay";
+
+        /**
+         * Unlock keystore with fingerprint after reboot
+         * @hide
+         */
+        public static final String FP_UNLOCK_KEYSTORE = "fp_unlock_keystore";
+
+        /**
+         * Change quick settings tiles animation style
+         *
+         * @hide
+         */
+        public static final String ANIM_TILE_STYLE = "anim_tile_style";
+
+        /**
+         * Change quick settings tiles animation duration
+         *
+         * @hide
+         */
+        public static final String ANIM_TILE_DURATION = "anim_tile_duration";
+
+        /**
+         * Change quick settings tiles interpolator
+         *
+         * @hide
+         */
+        public static final String ANIM_TILE_INTERPOLATOR = "anim_tile_interpolator";
+
+        /**
+         * @hide
+         */
+        public static final String SCREENRECORD_QUALITY_MODE = "screenrecord_quality_mode";
+
+        /**
+         * Whether to enable gaming mode or not
+         *
+         * @hide
+         */
+        public static final String ENABLE_GAMING_MODE = "enable_gaming_mode";
+
+        /**
+         * Which component to use for Recents UI
+         * 0 - Pie Recents (Quickstep)
+         * 1 - Oreo Recents (SystemUI)
+         * @hide
+         */
+        public static final String RECENTS_COMPONENT = "recents_component";
+
+        /** @hide */
+        public static final Validator RECENTS_COMPONENT_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 1);
+
+        /**
+         * Whether to show arrows in the navigation bar while typing
+         * @hide
+         */
+        public static final String NAVIGATION_BAR_MENU_ARROW_KEYS = "navigation_bar_menu_arrow_keys";
+
+        /**
+         * enable or disable single handed mode
+         * @hide
+         */
+        public static final String ONE_HAND_MODE_ENABLED = "one_hand_mode_enabled";
+
+        /** @hide */
+        private static final Validator ONE_HAND_MODE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -4737,6 +5090,7 @@ public final class Settings {
             NOTIFICATION_SOUND,
             ACCELEROMETER_ROTATION,
             SHOW_BATTERY_PERCENT,
+            SHOW_BATTERY_PERCENT_ON_QSB,
             NOTIFICATION_VIBRATION_INTENSITY,
             HAPTIC_FEEDBACK_INTENSITY,
             DISPLAY_COLOR_MODE,
@@ -4762,6 +5116,8 @@ public final class Settings {
             LOCKSCREEN_WEATHER_ENABLED,
             LOCKSCREEN_WEATHER_SHOW_TEMP,
             LOCKSCREEN_WEATHER_SHOW_CITY,
+            RECENTS_COMPONENT,
+            ONE_HAND_MODE_ENABLED,
         };
 
         /**
@@ -4875,6 +5231,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(LOCK_TO_APP_ENABLED);
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
+            PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT_ON_QSB);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
             PRIVATE_SETTINGS.add(SWAP_VOLUME_BUTTONS);
             PRIVATE_SETTINGS.add(NOTIFICATION_LIGHT_PULSE_DEFAULT_COLOR);
@@ -4921,6 +5278,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(LOCKSCREEN_WEATHER_ENABLED);
             PRIVATE_SETTINGS.add(LOCKSCREEN_WEATHER_SHOW_TEMP);
             PRIVATE_SETTINGS.add(LOCKSCREEN_WEATHER_SHOW_CITY);
+            PRIVATE_SETTINGS.add(RECENTS_COMPONENT);
+            PRIVATE_SETTINGS.add(ONE_HAND_MODE_ENABLED);
         }
 
         /**
@@ -5016,6 +5375,7 @@ public final class Settings {
             VALIDATORS.put(WIFI_STATIC_DNS1, WIFI_STATIC_DNS1_VALIDATOR);
             VALIDATORS.put(WIFI_STATIC_DNS2, WIFI_STATIC_DNS2_VALIDATOR);
             VALIDATORS.put(SHOW_BATTERY_PERCENT, SHOW_BATTERY_PERCENT_VALIDATOR);
+            VALIDATORS.put(SHOW_BATTERY_PERCENT_ON_QSB, SHOW_BATTERY_PERCENT_ON_QSB_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_LIGHT_SCREEN_ON, NOTIFICATION_LIGHT_SCREEN_ON_VALIDATOR);
             VALIDATORS.put(STATUS_BAR_CLOCK, STATUS_BAR_CLOCK_VALIDATOR);
             VALIDATORS.put(STATUSBAR_CLOCK_STYLE, STATUSBAR_CLOCK_STYLE_VALIDATOR);
@@ -5038,6 +5398,8 @@ public final class Settings {
             VALIDATORS.put(LOCKSCREEN_WEATHER_ENABLED, LOCKSCREEN_WEATHER_ENABLED_VALIDATOR);
             VALIDATORS.put(LOCKSCREEN_WEATHER_SHOW_TEMP, LOCKSCREEN_WEATHER_SHOW_TEMP_VALIDATOR);
             VALIDATORS.put(LOCKSCREEN_WEATHER_SHOW_CITY, LOCKSCREEN_WEATHER_SHOW_CITY_VALIDATOR);
+            VALIDATORS.put(RECENTS_COMPONENT,RECENTS_COMPONENT_VALIDATOR);
+            VALIDATORS.put(ONE_HAND_MODE_ENABLED, ONE_HAND_MODE_ENABLED_VALIDATOR);
         }
 
         /**
@@ -6723,6 +7085,13 @@ public final class Settings {
         private static final Validator ACCESSIBILITY_SPEAK_PASSWORD_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Hold current font name and name of the originating package Uses "|" as a delimiter
+         *
+         * @hide
+         */
+        public static final String START_SCREEN_STATE_SERVICE = "start_screen_state_service";
+
+        /**
          * Whether to draw text with high contrast while in accessibility mode.
          *
          * @hide
@@ -7474,6 +7843,12 @@ public final class Settings {
          */
         public static final String SEARCH_GLOBAL_SEARCH_ACTIVITY =
                 "search_global_search_activity";
+
+        /**
+         * Disable hw buttons - actions, brightness, haptic feedback, overflow menu
+         * @hide
+         */
+        public static final String HARDWARE_KEYS_DISABLE = "hardware_keys_disable";
 
         /**
          * The number of promoted sources in GlobalSearch.
@@ -8507,6 +8882,14 @@ public final class Settings {
         private static final Validator SYSTEM_NAVIGATION_KEYS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Wheter to dismiss notifications on fingerprint left and right swipe action
+         * @hide
+         */
+        public static final String FP_SWIPE_TO_DISMISS_NOTIFICATIONS = "fp_swipe_to_dismiss_notifications";
+
+        private static final Validator FP_SWIPE_TO_DISMISS_NOTIFICATIONS_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * Holds comma separated list of ordering of QS tiles.
          * @hide
          */
@@ -8836,6 +9219,7 @@ public final class Settings {
             MANUAL_RINGER_TOGGLE_COUNT,
             HUSH_GESTURE_USED,
             TORCH_POWER_BUTTON_GESTURE,
+            FP_SWIPE_TO_DISMISS_NOTIFICATIONS
         };
 
         /**
@@ -8986,6 +9370,7 @@ public final class Settings {
             VALIDATORS.put(MANUAL_RINGER_TOGGLE_COUNT, MANUAL_RINGER_TOGGLE_COUNT_VALIDATOR);
             VALIDATORS.put(TORCH_POWER_BUTTON_GESTURE, TORCH_POWER_BUTTON_GESTURE_VALIDATOR);
             VALIDATORS.put(LOCK_POWER_MENU_DISABLED, LOCK_POWER_MENU_DISABLED_VALIDATOR);
+            VALIDATORS.put(FP_SWIPE_TO_DISMISS_NOTIFICATIONS, FP_SWIPE_TO_DISMISS_NOTIFICATIONS_VALIDATOR);
         }
 
         /**
@@ -12435,7 +12820,7 @@ public final class Settings {
         /** @hide */ public static final int ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
         /** @hide */ public static final int ZEN_MODE_NO_INTERRUPTIONS = 2;
         /** @hide */ public static final int ZEN_MODE_ALARMS = 3;
-
+        /** @hide */ public static final int ZEN_MODE_OFF_ONLY = 4;
         /** @hide */ public static String zenModeToString(int mode) {
             if (mode == ZEN_MODE_IMPORTANT_INTERRUPTIONS) return "ZEN_MODE_IMPORTANT_INTERRUPTIONS";
             if (mode == ZEN_MODE_ALARMS) return "ZEN_MODE_ALARMS";
@@ -12873,6 +13258,25 @@ public final class Settings {
          */
         public static final String MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY =
                 "max_sound_trigger_detection_service_ops_per_day";
+
+        /**
+         * Disabled Transition animations of the android system
+         * @hide
+         */
+        public static final String DISABLE_TRANSITION_ANIMATIONS = "disable_transition_animations";
+
+        /**
+         * @hide
+         */
+        public static final String SHOW_CPU_OVERLAY = "show_cpu_overlay";
+
+        /**
+         * Whether applications can fake a signature.
+         * 1 = permit apps to fake signature
+         * 0 = disable this feature
+         * @hide
+         */
+        public static final String ALLOW_SIGNATURE_FAKE = "allow_signature_fake";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

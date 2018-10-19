@@ -48,24 +48,51 @@ import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerServiceImpl;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 /** Quick settings tile: Bluetooth **/
-public class BluetoothTile extends QSTileImpl<BooleanState> {
+public class BluetoothTile extends QSTileImpl<BooleanState> implements TunerService.Tunable {
     private static final Intent BLUETOOTH_SETTINGS = new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
 
     private final BluetoothController mController;
     private final BluetoothDetailAdapter mDetailAdapter;
     private final ActivityStarter mActivityStarter;
 
+    private boolean mShowBluetoothBattery;
+
+    private static final String BLUETOOTH_QS_SHOW_BATTERY =
+            "system:" + Settings.System.BLUETOOTH_QS_SHOW_BATTERY;
+    private final KeyguardMonitor mKeyguard;
+    private final KeyguardCallback mKeyguardCallback = new KeyguardCallback();
+
     public BluetoothTile(QSHost host) {
         super(host);
         mController = Dependency.get(BluetoothController.class);
         mActivityStarter = Dependency.get(ActivityStarter.class);
         mDetailAdapter = (BluetoothDetailAdapter) createDetailAdapter();
+        mKeyguard = Dependency.get(KeyguardMonitor.class);
+
+        Dependency.get(TunerService.class).addTunable(this,
+                BLUETOOTH_QS_SHOW_BATTERY);
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        switch (key) {
+            case BLUETOOTH_QS_SHOW_BATTERY:
+                mShowBluetoothBattery =
+                        newValue == null || Integer.parseInt(newValue) != 0;
+                refreshState();
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -87,18 +114,31 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     public void handleSetListening(boolean listening) {
         if (listening) {
             mController.addCallback(mCallback);
+            mKeyguard.addCallback(mKeyguardCallback);
         } else {
             mController.removeCallback(mCallback);
+            mKeyguard.removeCallback(mKeyguardCallback);
         }
     }
 
-    @Override
-    protected void handleClick() {
+    void handleClickInner() {
         // Secondary clicks are header clicks, just toggle.
         final boolean isEnabled = mState.value;
         // Immediately enter transient enabling state when turning bluetooth on.
         refreshState(isEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
         mController.setBluetoothEnabled(!isEnabled);
+    }
+
+    @Override
+    protected void handleClick() {
+        if (mKeyguard.isSecure() && mKeyguard.isShowing()) {
+            Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
+                mHost.openPanels();
+                handleClickInner();
+            });
+            return;
+        }
+        handleClickInner();
     }
 
     @Override
@@ -111,6 +151,13 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         if (!mController.canConfigBluetooth()) {
             mActivityStarter.postStartActivityDismissingKeyguard(
                     new Intent(Settings.ACTION_BLUETOOTH_SETTINGS), 0);
+            return;
+        }
+        if (mKeyguard.isSecure() && mKeyguard.isShowing()) {
+            Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
+                mHost.openPanels();
+                showDetail(true);
+            });
             return;
         }
         showDetail(true);
@@ -204,7 +251,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             CachedBluetoothDevice lastDevice = connectedDevices.get(0);
             final int batteryLevel = lastDevice.getBatteryLevel();
 
-            if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+            if (mShowBluetoothBattery && batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
                 return mContext.getString(
                         R.string.quick_settings_bluetooth_secondary_label_battery_level,
                         Utils.formatPercentage(batteryLevel));
@@ -440,4 +487,11 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             }
         }
     }
+
+    private final class KeyguardCallback implements KeyguardMonitor.Callback {
+        @Override
+        public void onKeyguardShowingChanged() {
+            refreshState();
+        }
+    };
 }

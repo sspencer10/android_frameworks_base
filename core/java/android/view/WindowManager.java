@@ -387,13 +387,21 @@ public interface WindowManager extends ViewManager {
      * Message for taking fullscreen screenshot
      * @hide
      */
-    final int TAKE_SCREENSHOT_FULLSCREEN = 1;
+    int TAKE_SCREENSHOT_FULLSCREEN = 1;
 
     /**
      * Message for taking screenshot of selected region.
      * @hide
      */
-    final int TAKE_SCREENSHOT_SELECTED_REGION = 2;
+    int TAKE_SCREENSHOT_SELECTED_REGION = 2;
+
+    /**
+     * Messages for starting a screen record session
+     * @hide
+     */
+    int SCREEN_RECORD_LOW_QUALITY = 0;
+    int SCREEN_RECORD_MID_QUALITY = 1;
+    int SCREEN_RECORD_HIGH_QUALITY = 2;
 
     /**
      * @hide
@@ -998,6 +1006,12 @@ public interface WindowManager extends ViewManager {
          * Used internally when there is no suitable type available.
          */
         public static final int INVALID_WINDOW_TYPE = -1;
+
+        /**
+         * Window type: Windows for OneHandOperation.
+         * @hide
+        */
+        public static final int TYPE_ONEHAND_OVERLAY = LAST_SYSTEM_WINDOW - 3;
 
         /**
          * Return true if the window type is an alert window.
