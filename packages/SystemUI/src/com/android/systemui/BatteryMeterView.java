@@ -416,7 +416,7 @@ public class BatteryMeterView extends LinearLayout implements
             mStyle = Settings.Secure.getIntForUser(resolver,
                 STATUS_BAR_BATTERY_STYLE, BatteryMeterDrawableBase.BATTERY_STYLE_PORTRAIT, mUser);
             mShowPercentOnQSB = Settings.System.getIntForUser(resolver,
-                SHOW_BATTERY_PERCENT_ON_QSB, 1, mUser);
+                SHOW_BATTERY_PERCENT_ON_QSB, 0, mUser);
             updateBatteryStyle();
             updateShowPercent();
             mDrawable.refresh();
