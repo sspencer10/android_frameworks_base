@@ -4232,24 +4232,13 @@ public final class Settings {
         /**
          * Setting to determine whether or not to show the battery percentage in the status bar.
          *    0 - Don't show percentage
-         *    1 - Show percentage outside
-         *    2 - Show percentage inside
+         *    1 - Show percentage
          * @hide
          */
         public static final String SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
 
         /** @hide */
-        public static final Validator SHOW_BATTERY_PERCENT_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
-
-        /**
-         * Setting to show the battery percentage in the quickstatusbar.
-         * @hide
-         */
-        public static final String SHOW_BATTERY_PERCENT_ON_QSB = "show_battery_percent_on_qsb";
-
-        /** @hide */
-        private static final Validator SHOW_BATTERY_PERCENT_ON_QSB_VALIDATOR = BOOLEAN_VALIDATOR;
+        private static final Validator SHOW_BATTERY_PERCENT_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
@@ -5171,7 +5160,6 @@ public final class Settings {
             NOTIFICATION_SOUND,
             ACCELEROMETER_ROTATION,
             SHOW_BATTERY_PERCENT,
-            SHOW_BATTERY_PERCENT_ON_QSB,
             NOTIFICATION_VIBRATION_INTENSITY,
             HAPTIC_FEEDBACK_INTENSITY,
             DISPLAY_COLOR_MODE,
@@ -5312,7 +5300,6 @@ public final class Settings {
             PRIVATE_SETTINGS.add(LOCK_TO_APP_ENABLED);
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
-            PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT_ON_QSB);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
             PRIVATE_SETTINGS.add(SWAP_VOLUME_BUTTONS);
             PRIVATE_SETTINGS.add(NOTIFICATION_LIGHT_PULSE_DEFAULT_COLOR);
@@ -5456,7 +5443,6 @@ public final class Settings {
             VALIDATORS.put(WIFI_STATIC_DNS1, WIFI_STATIC_DNS1_VALIDATOR);
             VALIDATORS.put(WIFI_STATIC_DNS2, WIFI_STATIC_DNS2_VALIDATOR);
             VALIDATORS.put(SHOW_BATTERY_PERCENT, SHOW_BATTERY_PERCENT_VALIDATOR);
-            VALIDATORS.put(SHOW_BATTERY_PERCENT_ON_QSB, SHOW_BATTERY_PERCENT_ON_QSB_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_LIGHT_SCREEN_ON, NOTIFICATION_LIGHT_SCREEN_ON_VALIDATOR);
             VALIDATORS.put(STATUS_BAR_CLOCK, STATUS_BAR_CLOCK_VALIDATOR);
             VALIDATORS.put(STATUSBAR_CLOCK_STYLE, STATUSBAR_CLOCK_STYLE_VALIDATOR);
@@ -9280,21 +9266,6 @@ public final class Settings {
          */
         public static final String STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD =
                 "status_bar_locked_on_secure_keyguard";
-
-        /**
-         * Display style of the status bar battery information
-         * 0: Display the battery an icon in portrait mode
-         * 1: Display the battery an icon in landscape mode
-         * 2: Display the battery as a circle
-         * 3: Display the battery as a dotted circle
-         * 4: Display the battery as a big circle and show level into the icon
-         * 5: Display the battery as a big dotted circle and show level into the icon
-         * 6: Display the battery as text
-         * 7: Do not display the battery
-         * default: 0
-         * @hide
-         */
-        public static final String STATUS_BAR_BATTERY_STYLE = "status_bar_battery_style";
 
         /**
          * Show UI feedback when using back gesture.

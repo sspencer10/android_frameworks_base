@@ -131,8 +131,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
     };
 
-
-
     /**
      * Runnable for automatically fading out the long press tooltip (as if it were animating away).
      */
@@ -180,7 +178,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mIconManager.setTint(fillColor);
 
         mBatteryMeterView = findViewById(R.id.battery);
-        mBatteryMeterView.setIsQuickSbHeaderOrKeyguard(true);
+        mBatteryMeterView.setForceShowPercent(true);
         mBatteryMeterView.setOnClickListener(this);
         mClockView = findViewById(R.id.clock);
         mClockView.setOnClickListener(this);
