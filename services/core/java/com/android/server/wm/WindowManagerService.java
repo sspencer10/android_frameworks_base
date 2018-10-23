@@ -248,6 +248,8 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
+import com.android.server.wm.onehand.IOneHandedAnimatorProxy;
+import com.android.internal.onehand.IOneHandedModeListener;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -270,7 +272,7 @@ import java.util.Date;
 import java.util.List;
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
-        implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
+        implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs, IOneHandedAnimatorProxy.IWindowManagerFuncs {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowManagerService" : TAG_WM;
 
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
@@ -676,6 +678,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Settings.Global.getUriFor(Settings.Global.TRANSITION_ANIMATION_SCALE);
         private final Uri mAnimationDurationScaleUri =
                 Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE);
+        private final Uri mDisableAnimationsUri =
+                Settings.System.getUriFor(Settings.System.DISABLE_TRANSITION_ANIMATIONS);
 
         public SettingsObserver() {
             super(new Handler());
@@ -688,6 +692,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mAnimationDurationScaleUri, false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(mDisableAnimationsUri, false, this,
+                    UserHandle.USER_ALL);
         }
 
         @Override
@@ -698,6 +704,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mDisplayInversionEnabledUri.equals(uri)) {
                 updateCircularDisplayMaskIfNeeded();
+            } else if (mDisableAnimationsUri.equals(uri))  {
+                mAnimationsForceDisabled = Settings.System.getInt(
+                    mContext.getContentResolver(), Settings.System.DISABLE_TRANSITION_ANIMATIONS, 0) != 0;
+                synchronized (mWindowMap) {
+                    dispatchNewAnimatorScaleLocked(null);
+                }
             } else {
                 @UpdateAnimationScaleMode
                 final int mode;
@@ -727,6 +739,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private float mTransitionAnimationScaleSetting = 1.0f;
     private float mAnimatorDurationScaleSetting = 1.0f;
     private boolean mAnimationsDisabled = false;
+    private boolean mAnimationsForceDisabled = false;
 
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
@@ -3163,11 +3176,15 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public float getWindowAnimationScaleLocked() {
-        return mAnimationsDisabled ? 0 : mWindowAnimationScaleSetting;
+        if (mAnimationsDisabled || mAnimationsForceDisabled)
+            return 0;
+        return mWindowAnimationScaleSetting;
     }
 
     public float getTransitionAnimationScaleLocked() {
-        return mAnimationsDisabled ? 0 : mTransitionAnimationScaleSetting;
+        if (mAnimationsDisabled || mAnimationsForceDisabled)
+            return 0;
+        return mTransitionAnimationScaleSetting;
     }
 
     @Override
@@ -3189,7 +3206,9 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public float getCurrentAnimatorScale() {
         synchronized(mWindowMap) {
-            return mAnimationsDisabled ? 0 : mAnimatorDurationScaleSetting;
+            if (mAnimationsDisabled || mAnimationsForceDisabled)
+                return 0;
+            return mAnimatorDurationScaleSetting;
         }
     }
 
@@ -3210,6 +3229,11 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Check if the service is set to dispatch pointer events. */
     boolean canDispatchPointerEvents() {
         return mPointerEventDispatcher != null;
+    }
+
+    @Override
+    public void addSystemUIVisibilityFlag(int flags) {
+        mLastStatusBarVisibility |= flags;
     }
 
     // Called by window manager policy. Not exposed externally.
@@ -5973,8 +5997,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setRecentsVisibility(boolean visible) {
-        mAmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
-                "setRecentsVisibility()");
+        /*mAmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
+                "setRecentsVisibility()");*/
         synchronized (mWindowMap) {
             mPolicy.setRecentsVisibilityLw(visible);
         }
@@ -5995,8 +6019,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setShelfHeight(boolean visible, int shelfHeight) {
-        mAmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
-                "setShelfHeight()");
+        /*mAmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
+                "setShelfHeight()");*/
         synchronized (mWindowMap) {
             getDefaultDisplayContentLocked().getPinnedStackController().setAdjustedForShelf(visible,
                     shelfHeight);
@@ -6119,6 +6143,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public boolean hasPermanentMenuKey() {
+        return mPolicy.hasPermanentMenuKey();
+    }
+
+    @Override
     public void sendCustomAction(Intent intent) {
         mPolicy.sendCustomAction(intent);
     }
@@ -6180,6 +6209,42 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             return stats;
         }
+    }
+
+    @Override
+    public boolean isOneHandedModeAvailable() {
+        if (!checkCallingPermission(android.Manifest.permission.ONE_HANDED_MODE,
+                "isOneHandedModeAvailable()")) {
+            throw new SecurityException("Requires ONE_HANDED_MODE permission");
+        }
+        return mAnimator.mOneHandAnimator.isOneHandedModeAvailable();
+    }
+
+    @Override
+    public float getOneHandedModeShrinkingScale() {
+        if (!checkCallingPermission(android.Manifest.permission.ONE_HANDED_MODE,
+                "getOneHandedModeShrinkingScale()")) {
+            throw new SecurityException("Requires ONE_HANDED_MODE permission");
+        }
+        return mAnimator.mOneHandAnimator.getShrinkingScale();
+    }
+
+    @Override
+    public void registerOneHandedModeListener(IOneHandedModeListener listener) {
+        if (!checkCallingPermission(android.Manifest.permission.ONE_HANDED_MODE,
+                "registerOneHandedModeListener()")) {
+            throw new SecurityException("Requires ONE_HANDED_MODE permission");
+        }
+        mAnimator.mOneHandAnimator.registerOneHandedModeListener(listener);
+    }
+
+    @Override
+    public void unregisterOneHandedModeListener(IOneHandedModeListener listener) {
+        if (!checkCallingPermission(android.Manifest.permission.ONE_HANDED_MODE,
+                "unregisterOneHandedModeListener()")) {
+            throw new SecurityException("Requires ONE_HANDED_MODE permission");
+        }
+        mAnimator.mOneHandAnimator.unregisterOneHandedModeListener(listener);
     }
 
     public void notifyAppRelaunching(IBinder token) {
@@ -6680,6 +6745,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     mRoot.forAllWindows(w -> {pw.println(w);}, true /* traverseTopToBottom */);
                 }
                 return;
+            } else if ("onehand".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    mAnimator.mOneHandAnimator.dump(pw, args);
+                }
+                return;
             } else {
                 // Dumping a single name?
                 if (!dumpWindows(pw, cmd, args, opti, dumpAll)) {
@@ -6729,6 +6799,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpWindowsLocked(pw, dumpAll, null);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            mAnimator.mOneHandAnimator.dump(pw, args);
         }
     }
 
@@ -7611,7 +7686,25 @@ public class WindowManagerService extends IWindowManager.Stub
         return this.mPolicy.isGestureButtonRegion(x, y);
     }
 
+    @Override
     public boolean isGestureButtonEnabled() {
         return this.mPolicy.isGestureButtonEnabled();
+    }
+
+    @Override
+    public void screenRecordAction(int mode) {
+        mPolicy.screenRecordAction(mode);
+    }
+
+    @Override
+    public Object getSyncRoot() {
+        return mWindowMap;
+    }
+
+    @Override
+    public void scheduleAnimation() {
+        synchronized (mWindowMap) {
+            scheduleAnimationLocked();
+        }
     }
 }

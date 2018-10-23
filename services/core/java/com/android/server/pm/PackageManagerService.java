@@ -1614,9 +1614,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 case MCS_GIVE_UP: {
                     if (DEBUG_INSTALL) Slog.i(TAG, "mcs_giveup too many retries");
-                    HandlerParams params = mPendingInstalls.remove(0);
-                    Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
-                            System.identityHashCode(params));
+                    if (mPendingInstalls.size() > 0) {
+                        HandlerParams params = mPendingInstalls.remove(0);
+                        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
+                                System.identityHashCode(params));
+                    }
                     break;
                 }
                 case SEND_PENDING_BROADCAST: {
@@ -3977,8 +3979,9 @@ public class PackageManagerService extends IPackageManager.Stub
             final Set<String> permissions = ArrayUtils.isEmpty(p.requestedPermissions)
                     ? Collections.<String>emptySet() : permissionsState.getPermissions(userId);
 
-            PackageInfo packageInfo = PackageParser.generatePackageInfo(p, gids, flags,
-                    ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId);
+            PackageInfo packageInfo = mayFakeSignature(p, PackageParser.generatePackageInfo(p, gids, flags,
+                ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId),
+                permissions);
 
             if (packageInfo == null) {
                 return null;
@@ -4012,6 +4015,26 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             return null;
         }
+    }
+
+    private PackageInfo mayFakeSignature(PackageParser.Package p, PackageInfo pi,
+            Set<String> permissions) {
+        try {
+            if (permissions.contains("android.permission.FAKE_PACKAGE_SIGNATURE")
+                    && p.applicationInfo.targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1
+                    && p.mAppMetaData != null
+                    && android.provider.Settings.Global.getInt(mContext.getContentResolver(),
+                       android.provider.Settings.Global.ALLOW_SIGNATURE_FAKE, 0) == 1) {
+                String sig = p.mAppMetaData.getString("fake-signature");
+                if (sig != null) {
+                    pi.signatures = new Signature[] {new Signature(sig)};
+                }
+            }
+        } catch (Throwable t) {
+            // We should never die because of any failures, this is system code!
+            Log.w("PackageManagerService.FAKE_PACKAGE_SIGNATURE", t);
+        }
+        return pi;
     }
 
     @Override

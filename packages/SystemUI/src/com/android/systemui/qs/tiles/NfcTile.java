@@ -30,22 +30,27 @@ import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 /** Quick settings tile: Enable/Disable NFC **/
 public class NfcTile extends QSTileImpl<BooleanState> {
 
-    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_nfc_enabled);
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_nfc);
 
     private NfcAdapter mAdapter;
-
     private boolean mListening;
+    private final KeyguardMonitor mKeyguard;
+    private final KeyguardCallback mKeyguardCallback = new KeyguardCallback();
 
     public NfcTile(QSHost host) {
         super(host);
+        mKeyguard = Dependency.get(KeyguardMonitor.class);
     }
 
     @Override
@@ -59,8 +64,10 @@ public class NfcTile extends QSTileImpl<BooleanState> {
         if (mListening) {
             mContext.registerReceiver(mNfcReceiver,
                     new IntentFilter(NfcAdapter.ACTION_ADAPTER_STATE_CHANGED));
+            mKeyguard.addCallback(mKeyguardCallback);
         } else {
             mContext.unregisterReceiver(mNfcReceiver);
+            mKeyguard.removeCallback(mKeyguardCallback);
         }
     }
 
@@ -78,13 +85,24 @@ public class NfcTile extends QSTileImpl<BooleanState> {
         return new Intent(Settings.ACTION_NFC_SETTINGS);
     }
 
-    @Override
-    protected void handleClick() {
+    private void handleClickInner() {
         if (!getAdapter().isEnabled()) {
             getAdapter().enable();
         } else {
             getAdapter().disable();
         }
+    }
+
+    @Override
+    protected void handleClick() {
+        if (mKeyguard.isSecure() && mKeyguard.isShowing()) {
+            Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
+                mHost.openPanels();
+                handleClickInner();
+            });
+            return;
+        }
+        handleClickInner();
     }
 
     @Override
@@ -99,21 +117,14 @@ public class NfcTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
-
         if (getAdapter() == null) return;
+
         state.value = getAdapter().isEnabled();
         state.label = mContext.getString(R.string.quick_settings_nfc_label);
-        state.slash.isSlashed = !state.value;
         state.icon = mIcon;
-        state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
-
+        state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-
     }
 
     @Override
@@ -144,6 +155,13 @@ public class NfcTile extends QSTileImpl<BooleanState> {
     private BroadcastReceiver mNfcReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            refreshState();
+        }
+    };
+
+    private final class KeyguardCallback implements KeyguardMonitor.Callback {
+        @Override
+        public void onKeyguardShowingChanged() {
             refreshState();
         }
     };
