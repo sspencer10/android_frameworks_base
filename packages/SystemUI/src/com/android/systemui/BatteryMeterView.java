@@ -86,8 +86,6 @@ public class BatteryMeterView extends LinearLayout implements
     private int mUser;
 
     private final Context mContext;
-    private final int mFrameColor;
-
 
     /**
      * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings.
@@ -113,7 +111,6 @@ public class BatteryMeterView extends LinearLayout implements
     public BatteryMeterView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
-        Resources res = getResources();
 
         setOrientation(LinearLayout.HORIZONTAL);
         setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
@@ -122,7 +119,6 @@ public class BatteryMeterView extends LinearLayout implements
                 defStyle, 0);
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
                 context.getColor(R.color.meter_background_color));
-        mFrameColor = frameColor;
         mDrawable = new BatteryMeterDrawableBase(context, frameColor);
         atts.recycle();
 
@@ -134,7 +130,6 @@ public class BatteryMeterView extends LinearLayout implements
         mSlotBattery = context.getString(
                 com.android.internal.R.string.status_bar_battery);
 
-        updateShowPercent();
         setColorsFromContext(context);
         // Init to not dark at all.
         onDarkChanged(new Rect(), 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
@@ -474,6 +469,14 @@ public class BatteryMeterView extends LinearLayout implements
         final int style = mStyle;
 
         switch (style) {
+            case BatteryMeterDrawableBase.BATTERY_STYLE_HIDDEN:
+                if (mBatteryIconView != null) {
+                    removeView(mBatteryIconView);
+                    mBatteryIconView = null;
+                    removeView(mBatteryPercentView);
+                    mBatteryPercentView = null;
+                }
+                break;
             case BatteryMeterDrawableBase.BATTERY_STYLE_TEXT:
                 if (mBatteryIconView != null) {
                     removeView(mBatteryIconView);
@@ -493,7 +496,7 @@ public class BatteryMeterView extends LinearLayout implements
                 }
                 break;
         }
-
+        updateVisibility();
         updateShowPercent();
         onDensityOrFontScaleChanged();
     }
