@@ -90,11 +90,11 @@ public class BatteryMeterView extends LinearLayout implements
     private int mTextChargingSymbol;
 
     private static final String SHOW_BATTERY_PERCENT =
-            Settings.System.SHOW_BATTERY_PERCENT;
+            "system:" + Settings.System.SHOW_BATTERY_PERCENT;
     private static final String STATUS_BAR_BATTERY_STYLE =
-            Settings.System.STATUS_BAR_BATTERY_STYLE;
+            "system:" + Settings.System.STATUS_BAR_BATTERY_STYLE;
     private static final String TEXT_CHARGING_SYMBOL =
-            Settings.System.TEXT_CHARGING_SYMBOL;
+            "system:" + Settings.System.TEXT_CHARGING_SYMBOL;
 
     public BatteryMeterView(Context context) {
         this(context, null, 0);
