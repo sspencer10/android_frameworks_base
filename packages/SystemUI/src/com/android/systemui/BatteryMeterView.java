@@ -45,6 +45,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.settingslib.R;
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.BatteryMeterDrawableBase;
 import com.android.systemui.settings.CurrentUserTracker;

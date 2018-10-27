@@ -56,6 +56,7 @@ public class BatteryMeterDrawableBase extends Drawable {
     public static final int BATTERY_STYLE_HIDDEN = 6;
 
     protected final Context mContext;
+    protected final Resources res;
     protected final Paint mFramePaint;
     protected final Paint mBatteryPaint;
     protected final Paint mWarningTextPaint;
@@ -111,7 +112,7 @@ public class BatteryMeterDrawableBase extends Drawable {
 
     public BatteryMeterDrawableBase(Context context, int frameColor) {
         mContext = context;
-        final Resources res = context.getResources();
+        res = context.getResources();
         TypedArray levels = res.obtainTypedArray(R.array.batterymeter_color_levels);
         TypedArray colors = res.obtainTypedArray(R.array.batterymeter_color_values);
 
@@ -279,6 +280,12 @@ public class BatteryMeterDrawableBase extends Drawable {
             case BATTERY_STYLE_PORTRAIT:
                 mIntrinsicWidth = mContext.getResources().getDimensionPixelSize(R.dimen.battery_width);
                 mIntrinsicHeight = mContext.getResources().getDimensionPixelSize(R.dimen.battery_height);
+                break;
+            case BatteryMeterDrawableBase.BATTERY_STYLE_BIG_CIRCLE:
+            case BatteryMeterDrawableBase.BATTERY_STYLE_BIG_DOTTED_CIRCLE:
+                mIntrinsicWidth = res.getDimensionPixelSize(R.dimen.status_bar_battery_circle_icon_height);
+                mIntrinsicHeight = res.getDimensionPixelSize(R.dimen.status_bar_battery_circle_icon_height);
+                break;
             default:
                 mIntrinsicWidth = mContext.getResources().getDimensionPixelSize(R.dimen.battery_height);
                 mIntrinsicHeight = mContext.getResources().getDimensionPixelSize(R.dimen.battery_height);

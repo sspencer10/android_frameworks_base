@@ -694,4 +694,11 @@
     <dimen name="harmful_app_message_padding_bottom">24dp</dimen>
     <!-- Line spacing modifier for the message field of the harmful app dialog -->
     <item name="harmful_app_message_line_spacing_modifier" type="dimen">1.22</item>
+
+    <!-- Height of the battery circle icon in the status bar. -->
+    <dimen name="status_bar_battery_circle_icon_height">19.5dp</dimen>
+
+    <!-- Width of the battery circle icon in the status bar. -->
+    <dimen name="status_bar_battery_circle_icon_width">19.5dp</dimen>
+
 </resources>
