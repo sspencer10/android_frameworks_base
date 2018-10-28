@@ -16,10 +16,22 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <!-- Navigation keys swaped layout -->
-    <string name="config_navBarLayoutSwapped" translatable="false">left[.5W],recent[1WC];home;back[1WC],right[.5W]</string>
-
     <!-- Allow Opa (Pixel navbar) layout -->
     <bool name="config_allowOpaLayout">true</bool>
+
+    <!-- Config to enable/diaable qs tile tinting -->
+    <bool name="config_enable_qs_tile_tinting">false</bool>
+
+    <!-- Overall pie animation speed --> 
+    <integer name="pie_animation_speed">250</integer> 
+ 
+    <!-- Maximum amount of notification icons allowed to show in PIE --> 
+    <integer name="pie_maximum_notifications">8</integer> 
+ 
+    <!-- Pie letter spacing --> 
+    <item name="pie_status_letter_spacing" format="float" type="integer">0.2</item> 
+    <item name="pie_clock_letter_spacing" format="float" type="integer">0.1</item> 
+    <bool name="config_relocatePieOnRotation">true</bool> 
+    <bool name="config_forcePieCentered">true</bool>   
 
 </resources>

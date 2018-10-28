@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007-2008 The Android Open Source Project
+ * This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -41,8 +42,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.InputType;
 import android.text.Layout;
@@ -79,6 +83,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.statusbar.IStatusBarService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -341,6 +346,23 @@ public class InputMethodService extends AbstractInputMethodService {
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
     private static final int BACK_DISPOSITION_MAX = BACK_DISPOSITION_ADJUST_NOTHING;
 
+    int mVolumeKeyCursorControl = 0;
+
+    /**
+     * @hide
+     */
+    public static final int VOLUME_CURSOR_OFF = 0;
+
+    /**
+     * @hide
+     */
+    public static final int VOLUME_CURSOR_ON = 1;
+
+    /**
+     * @hide
+     */
+    public static final int VOLUME_CURSOR_ON_REVERSE = 2;
+
     InputMethodManager mImm;
     
     int mTheme = 0;
@@ -414,6 +436,13 @@ public class InputMethodService extends AbstractInputMethodService {
      * by calling 1) {@code mWindow.show()} or 2) {@link #clearInsetOfPreviousIme()}.
      */
     boolean mShouldClearInsetOfPreviousIme;
+
+    Handler mHandler;
+
+    boolean mForcedAutoRotate;
+
+    private IStatusBarService mStatusBarService;
+    private Object mServiceAquireLock = new Object();
 
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
@@ -495,6 +524,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (DEBUG) Log.v(TAG, "unbindInput(): binding=" + mInputBinding
                     + " ic=" + mInputConnection);
             onUnbindInput();
+            mInputStarted = false;
             mInputBinding = null;
             mInputConnection = null;
         }
@@ -575,6 +605,8 @@ public class InputMethodService extends AbstractInputMethodService {
                     // detect errors in #showWindow() by checking BadTokenException.
                     // TODO: Investigate its feasibility.  Update JavaDoc of #showWindow() of
                     // whether it's OK to override #showWindow() or not.
+                    initSoftWindow();
+                    initViews();
                 }
             }
             clearInsetOfPreviousIme();
@@ -921,14 +953,17 @@ public class InputMethodService extends AbstractInputMethodService {
         mShouldClearInsetOfPreviousIme = (mImm.getInputMethodWindowVisibleHeight() > 0);
         mInflater = (LayoutInflater)getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
+        initSoftWindow();
+        initViews();
+    }
+
+    void initSoftWindow() {
         mWindow = new SoftInputWindow(this, "InputMethod", mTheme, null, null, mDispatcherState,
                 WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
         // For ColorView in DecorView to work, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS needs to be set
         // by default (but IME developers can opt this out later if they want a new behavior).
         mWindow.getWindow().setFlags(
                 FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-
-        initViews();
         mWindow.getWindow().setLayout(MATCH_PARENT, WRAP_CONTENT);
     }
 
@@ -984,6 +1019,8 @@ public class InputMethodService extends AbstractInputMethodService {
         mCandidatesVisibility = getCandidatesHiddenVisibility();
         mCandidatesFrame.setVisibility(mCandidatesVisibility);
         mInputFrame.setVisibility(View.GONE);
+
+        mHandler = new Handler();
     }
 
     @Override public void onDestroy() {
@@ -1219,7 +1256,15 @@ public class InputMethodService extends AbstractInputMethodService {
      * is currently running in fullscreen mode.
      */
     public void updateFullscreenMode() {
-        boolean isFullscreen = mShowInputRequested && onEvaluateFullscreenMode();
+        boolean fullScreenOverride = Settings.System.getIntForUser(getContentResolver(),
+                Settings.System.DISABLE_FULLSCREEN_KEYBOARD, 0,
+                UserHandle.USER_CURRENT_OR_SELF) != 0;
+        boolean isFullscreen;
+        if (fullScreenOverride) {
+            isFullscreen = false;
+        } else {
+            isFullscreen = mShowInputRequested && onEvaluateFullscreenMode();
+        }
         boolean changed = mLastShowInputRequested != mShowInputRequested;
         if (mIsFullscreen != isFullscreen || !mFullscreenApplied) {
             changed = true;
@@ -1815,6 +1860,28 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindowWasVisible = true;
             mInShowWindow = false;
         }
+
+        IStatusBarService statusbar = getStatusBarService();
+        int mKeyboardRotationTimeout = Settings.System.getIntForUser(getContentResolver(),
+                Settings.System.KEYBOARD_ROTATION_TIMEOUT, 0, UserHandle.USER_CURRENT_OR_SELF);
+        if (mKeyboardRotationTimeout > 0) {
+            mHandler.removeCallbacks(restoreAutoRotation);
+            if (!mForcedAutoRotate) {
+                boolean isAutoRotate = (Settings.System.getIntForUser(getContentResolver(),
+                    Settings.System.ACCELEROMETER_ROTATION, 0,
+                    UserHandle.USER_CURRENT_OR_SELF) == 1);
+                if (!isAutoRotate) {
+                    try {
+                        if (statusbar != null) {
+                            statusbar.setAutoRotate(true);
+                            mForcedAutoRotate = true;
+                        }
+                    } catch (RemoteException e) {
+                        mStatusBarService = null;
+                    }
+                }
+            }
+        }
     }
 
     void showWindowInner(boolean showInput) {
@@ -1900,7 +1967,30 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindowWasVisible = false;
         }
         updateFullscreenMode();
+
+        int mKeyboardRotationTimeout = Settings.System.getIntForUser(getContentResolver(),
+                Settings.System.KEYBOARD_ROTATION_TIMEOUT, 0, UserHandle.USER_CURRENT_OR_SELF);
+        if (mKeyboardRotationTimeout > 0) {
+            mHandler.removeCallbacks(restoreAutoRotation);
+            if (mForcedAutoRotate) {
+                mHandler.postDelayed(restoreAutoRotation, mKeyboardRotationTimeout);
+            }
+        }
     }
+
+    final Runnable restoreAutoRotation = new Runnable() {
+        @Override public void run() {
+            try {
+                IStatusBarService statusbar = getStatusBarService();
+                if (statusbar != null) {
+                    statusbar.setAutoRotate(false);
+                }
+                mForcedAutoRotate = false;
+            } catch (RemoteException e) {
+                mStatusBarService = null;
+            }
+        }
+    };
 
     /**
      * Called immediately before the input method window is shown to the user.
@@ -2222,6 +2312,26 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             return false;
         }
+        if (event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP) {
+            mVolumeKeyCursorControl = Settings.System.getIntForUser(getContentResolver(),
+                    Settings.System.VOLUME_KEY_CURSOR_CONTROL, 0, UserHandle.USER_CURRENT_OR_SELF);
+            if (isInputViewShown() && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
+                sendDownUpKeyEvents((mVolumeKeyCursorControl == VOLUME_CURSOR_ON_REVERSE)
+                        ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT);
+                return true;
+            }
+            return false;
+        }
+        if (event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            mVolumeKeyCursorControl = Settings.System.getIntForUser(getContentResolver(),
+                    Settings.System.VOLUME_KEY_CURSOR_CONTROL, 0, UserHandle.USER_CURRENT_OR_SELF);
+            if (isInputViewShown() && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
+                sendDownUpKeyEvents((mVolumeKeyCursorControl == VOLUME_CURSOR_ON_REVERSE)
+                        ? KeyEvent.KEYCODE_DPAD_LEFT : KeyEvent.KEYCODE_DPAD_RIGHT);
+                return true;
+            }
+            return false;
+        }
         return doMovementKey(keyCode, event, MOVEMENT_DOWN);
     }
 
@@ -2271,6 +2381,15 @@ public class InputMethodService extends AbstractInputMethodService {
             if (event.isTracking() && !event.isCanceled()) {
                 return handleBack(true);
             }
+        }
+        if (event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP
+                 || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            mVolumeKeyCursorControl = Settings.System.getIntForUser(getContentResolver(),
+                    Settings.System.VOLUME_KEY_CURSOR_CONTROL, 0, UserHandle.USER_CURRENT_OR_SELF);
+            if (isInputViewShown() && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
+                return true;
+            }
+            return false;
         }
         return doMovementKey(keyCode, event, MOVEMENT_UP);
     }
@@ -2592,6 +2711,16 @@ public class InputMethodService extends AbstractInputMethodService {
             ic.performContextMenuAction(id);
         }
         return true;
+    }
+
+    IStatusBarService getStatusBarService() {
+        synchronized (mServiceAquireLock) {
+            if (mStatusBarService == null) {
+                mStatusBarService = IStatusBarService.Stub.asInterface(
+                        ServiceManager.getService("statusbar"));
+            }
+            return mStatusBarService;
+        }
     }
 
     /**

@@ -1542,6 +1542,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_access_notification_policy">Allows the app to read and write Do Not Disturb configuration.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_restartUI">restart the system bars</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_restartUI">Restart SystemUIService so that system bars can load themed resources</string>
+
     <!-- Policy administration -->
 
     <!-- Title of policy access to limiting the user's password choices -->
@@ -4950,6 +4955,9 @@
 
     <string name="volume_dialog_ringer_guidance_vibrate">Calls and notifications will vibrate</string>
     <string name="volume_dialog_ringer_guidance_silent">Calls and notifications will be muted</string>
+
+    <!-- Informative text shown when the device is in One handed mode. It also explains how to exit the mode. -->
+    <string name="onehand_guide" xliff:restype="x-GENERIC/FULLSCREEN/TEXT">Tap blank area to exit One handed mode</string>
 
     <!-- Title for the notification channel notifying user of settings system changes. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_system_changes">System changes</string>
