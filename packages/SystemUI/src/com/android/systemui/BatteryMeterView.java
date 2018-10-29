@@ -356,14 +356,14 @@ public class BatteryMeterView extends LinearLayout implements
         if (mShow) {
             if (!showing) {
                 mBatteryPercentView = loadPercentView();
-                if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);
-                updatePercentText();
                 addView(mBatteryPercentView,
                         new ViewGroup.LayoutParams(
                                 LayoutParams.WRAP_CONTENT,
                                 LayoutParams.MATCH_PARENT));
                 reloadImage();
             }
+            if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);
+            updatePercentText();
         } else {
             if (showing) {
                 removeView(mBatteryPercentView);
@@ -485,6 +485,7 @@ public class BatteryMeterView extends LinearLayout implements
                 SHOW_BATTERY_PERCENT_ON_QSB, 0, mUser);
             updateBatteryStyle();
             updateShowPercent();
+            updatePercentText();
             mDrawable.refresh();
         }
     }
