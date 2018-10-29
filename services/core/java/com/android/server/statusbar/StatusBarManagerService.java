@@ -481,6 +481,78 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
     }
 
+    @Override
+    public void toggleRecentApps() {
+        enforceStatusBarService();
+
+        if (mBar != null) {
+            try {
+                mBar.toggleRecentApps();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void toggleSplitScreen() {
+        enforceStatusBarService();
+
+        if (mBar != null) {
+            try {
+                mBar.toggleSplitScreen();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void preloadRecentApps() {
+        enforceStatusBarService();
+
+        if (mBar != null) {
+            try {
+                mBar.preloadRecentApps();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void cancelPreloadRecentApps() {
+        enforceStatusBarService();
+
+        if (mBar != null) {
+            try {
+                mBar.cancelPreloadRecentApps();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void restartUI() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RESTART_UI,
+                "StatusBarManagerService");
+        if (mBar != null) {
+            try {
+                mBar.restartUI();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void startAssist(Bundle args) {
+        enforceStatusBarService();
+
+        if (mBar != null) {
+            try {
+                mBar.startAssist(args);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
     public void addTile(ComponentName component) {
         enforceStatusBarOrShell();
 
@@ -836,11 +908,31 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
     }
 
+    @Override
+    public void toggleOrientationListener(boolean enable) {
+        if (mBar != null) {
+            try {
+                mBar.toggleOrientationListener(enable);
+            } catch (RemoteException ex) {
+                // system is dead
+            }
+        }
+    }
+
     private void enforceStatusBarOrShell() {
         if (Binder.getCallingUid() == Process.SHELL_UID) {
             return;
         }
         enforceStatusBar();
+    }
+
+    @Override
+    public void setAutoRotate(boolean enabled) {
+        if (mBar != null) {
+            try {
+                mBar.setAutoRotate(enabled);
+            } catch (RemoteException ex) {}
+        }
     }
 
     private void enforceStatusBar() {

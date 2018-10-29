@@ -85,6 +85,7 @@ import com.android.systemui.util.NotificationChannels;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -150,7 +151,16 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             CharSequence appName = pm.getApplicationLabel(info.applicationInfo);
             if (appName != null) {
                 // replace all spaces and special chars with an underscore
-                String appNameString = appName.toString().replaceAll("[\\\\/:*?\"<>|\\s]+", "_");
+                String appNameString = appName.toString();
+                try {
+                    // With some languages like Virgin Islands English, the Settings app gets a weird
+                    // long name and some special voodoo chars, so we convert the string to utf-8 to get
+                    // a  char instead, easy to remove it then
+                    final String temp = new String(appNameString.getBytes("ISO-8859-15"), "UTF-8");
+                    appNameString = temp.replaceAll("[]+", "");
+                } catch (UnsupportedEncodingException e) {}
+                // Now remove all special chars from the app name
+                appNameString = appNameString.replaceAll("[\\\\/:*?\"<>|\\s]+", "_");
                 mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE_APPNAME, appNameString, imageDate);
             }
         }
@@ -468,6 +478,7 @@ class GlobalScreenshot {
 
     private Bitmap mScreenBitmap;
     private View mScreenshotLayout;
+    private View mScreenshotSelectorLayout;
     private ScreenshotSelectorView mScreenshotSelectorView;
     private ImageView mBackgroundView;
     private ImageView mScreenshotView;
@@ -496,15 +507,17 @@ class GlobalScreenshot {
         // Inflate the screenshot layout
         mDisplayMatrix = new Matrix();
         mScreenshotLayout = layoutInflater.inflate(R.layout.global_screenshot, null);
+        mScreenshotSelectorLayout = layoutInflater.inflate(R.layout.global_screenshot, null);
         mBackgroundView = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot_background);
         mScreenshotView = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot);
         mScreenshotFlash = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
-        mScreenshotSelectorView = (ScreenshotSelectorView) mScreenshotLayout.findViewById(
+        mScreenshotSelectorView = (ScreenshotSelectorView) mScreenshotSelectorLayout.findViewById(
                 R.id.global_screenshot_selector);
         mScreenshotLayout.setFocusable(true);
+        mScreenshotSelectorLayout.setFocusable(true);
         mScreenshotSelectorView.setFocusable(true);
         mScreenshotSelectorView.setFocusableInTouchMode(true);
-        mScreenshotLayout.setOnTouchListener(new View.OnTouchListener() {
+        mScreenshotSelectorLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 // Intercept and ignore all touch events
@@ -626,7 +639,7 @@ class GlobalScreenshot {
      */
     void takeScreenshotPartial(final Runnable finisher, final boolean statusBarVisible,
             final boolean navBarVisible) {
-        mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
+        mWindowManager.addView(mScreenshotSelectorLayout, mWindowLayoutParams);
         mScreenshotSelectorView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -640,12 +653,12 @@ class GlobalScreenshot {
                         return true;
                     case MotionEvent.ACTION_UP:
                         view.setVisibility(View.GONE);
-                        mWindowManager.removeView(mScreenshotLayout);
+                        mWindowManager.removeView(mScreenshotSelectorLayout);
                         final Rect rect = view.getSelectionRect();
                         if (rect != null) {
                             if (rect.width() != 0 && rect.height() != 0) {
-                                // Need mScreenshotLayout to handle it after the view disappears
-                                mScreenshotLayout.post(new Runnable() {
+                                // Need mScreenshotSelectorLayout to handle it after the view disappears
+                                mScreenshotSelectorLayout.post(new Runnable() {
                                     public void run() {
                                         takeScreenshot(finisher, statusBarVisible, navBarVisible,
                                                 rect);
@@ -661,7 +674,7 @@ class GlobalScreenshot {
                 return false;
             }
         });
-        mScreenshotLayout.post(new Runnable() {
+        mScreenshotSelectorLayout.post(new Runnable() {
             @Override
             public void run() {
                 mScreenshotSelectorView.setVisibility(View.VISIBLE);
@@ -678,6 +691,7 @@ class GlobalScreenshot {
         if (mScreenshotSelectorView.getSelectionRect() != null) {
             try {
                 mWindowManager.removeView(mScreenshotLayout);
+		mWindowManager.removeView(mScreenshotSelectorLayout);
                 mScreenshotSelectorView.stopSelection();
             } catch (IllegalArgumentException ignored) {
             }

@@ -972,7 +972,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void handleMobileDataAlwaysOn() {
         final boolean enable = toBool(Settings.Global.getInt(
-                mContext.getContentResolver(), Settings.Global.MOBILE_DATA_ALWAYS_ON, 1));
+                mContext.getContentResolver(), Settings.Global.MOBILE_DATA_ALWAYS_ON, 0));
         final boolean isEnabled = (mNetworkRequests.get(mDefaultMobileDataRequest) != null);
         if (enable == isEnabled) {
             return;  // Nothing to do.
@@ -1630,7 +1630,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         @Override
         public void onRestrictBackgroundChanged(boolean restrictBackground) {
             // TODO: relocate this specific callback in Tethering.
-            if (restrictBackground) {
+            if (restrictBackground && isTetheringSupported()) {
                 log("onRestrictBackgroundChanged(true): disabling tethering");
                 mTethering.untetherAll();
             }
@@ -1885,6 +1885,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
             } catch (Exception e) {
                 loge("Exception in removeDataActivityTracking " + e);
             }
+        }
+    }
+
+    /**
+     * Update data activity tracking when network state is updated.
+     */
+    private void updateDataActivityTracking(NetworkAgentInfo newNetwork,
+            NetworkAgentInfo oldNetwork) {
+        if (newNetwork != null) {
+            setupDataActivityTracking(newNetwork);
+        }
+        if (oldNetwork != null) {
+            removeDataActivityTracking(oldNetwork);
         }
     }
 
@@ -2543,7 +2556,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         nai.clearLingerState();
         if (nai.isSatisfyingRequest(mDefaultRequest.requestId)) {
-            removeDataActivityTracking(nai);
+            updateDataActivityTracking(null /*new Network*/, nai);
             notifyLockdownVpn(nai);
             ensureNetworkTransitionWakelock(nai.name());
         }
@@ -5201,7 +5214,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void makeDefault(NetworkAgentInfo newNetwork) {
         if (DBG) log("Switching to new default network: " + newNetwork);
-        setupDataActivityTracking(newNetwork);
         try {
             mNetd.setDefaultNetId(newNetwork.network.netId);
         } catch (Exception e) {
@@ -5377,6 +5389,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         if (isNewDefault) {
+            updateDataActivityTracking(newNetwork, oldDefaultNetwork);
             // Notify system services that this network is up.
             makeDefault(newNetwork);
             // Log 0 -> X and Y -> X default network transitions, where X is the new default.
